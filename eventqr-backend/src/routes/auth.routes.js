@@ -90,6 +90,52 @@ router.post("/login", login);
  */
 router.post("/verify-otp", verifyOtp)
 
+/**
+ * @swagger
+ * /auth/resend-otp:
+ *   post:
+ *     summary: Resend OTP
+ *     description: Resends an OTP for either account verification or password reset.
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - type
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: user@example.com
+ *               type:
+ *                 type: string
+ *                 enum: [verify, reset]
+ *                 example: verify
+ *     responses:
+ *       200:
+ *         description: OTP resent successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: OTP resent successfully
+ *       400:
+ *         description: Bad request or invalid input
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Email and type required
+ */
 router.post("/resend-otp", resendOtp);
 
 /**
