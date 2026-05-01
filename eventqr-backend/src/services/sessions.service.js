@@ -38,3 +38,27 @@ export const updateSessionService = async (sessionId, user, data) => {
 
     return session;
 };
+
+export const deleteSessionService = async (sessionId, user) => {
+    if (!mongoose.Types.ObjectId.isValid(sessionId)) {
+        throw new Error("Invalid session ID");
+    }
+
+    const event = await Event.findOne({
+        "sessions._id": sessionId,
+    });
+
+    if (!event) {
+        throw new Error("Session not found");
+    }
+
+    if (event.organizer.toString() !== user.id) {
+        throw new Error("Unauthorized");
+    }
+
+    event.sessions.pull({ _id: sessionId });
+
+    await event.save();
+
+    return true;
+}

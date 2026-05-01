@@ -1,7 +1,7 @@
 import express from "express";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { requireRole } from "../middleware/role.middleware.js";
-import { updateSession } from "../controllers/sessions.controller.js";
+import { deleteSession, updateSession } from "../controllers/sessions.controller.js";
 
 const router = express.Router();
 
@@ -77,5 +77,43 @@ router.put(
   requireRole("organizer"),
   updateSession
 );
+
+/**
+ * @swagger
+ * /api/sessions/{sessionId}:
+ *   delete:
+ *     summary: Delete a session (organizer only)
+ *     tags: [Sessions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: sessionId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: 70a123abc456def7890abcd1
+ *     responses:
+ *       200:
+ *         description: Session deleted successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Session deleted successfully
+ *       400:
+ *         description: Invalid session ID
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (not organizer or not owner)
+ *       404:
+ *         description: Session not found
+ */
+router.delete(
+    "/:sessionId",
+    authMiddleware,
+    requireRole("organizer"),
+    deleteSession
+)
 
 export default router;

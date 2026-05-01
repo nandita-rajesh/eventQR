@@ -1,4 +1,4 @@
-import { updateSessionService } from "../services/sessions.service.js";
+import { deleteSessionService, updateSessionService } from "../services/sessions.service.js";
 
 export const updateSession = async (req, res) => {
     try {
@@ -25,6 +25,31 @@ export const updateSession = async (req, res) => {
 
         if (err.message === "Invalid session time") {
             return res.status(400).json({ error: err.message });
+        }
+
+        return res.status(500).json({error: err.message});
+    }
+}
+
+export const deleteSession = async(req, res) => {
+    try {
+        await deleteSessionService(
+            req.params.sessionId,
+            req.user);
+
+        return res.json({message: "Session deleted successfully"});
+
+    } catch(err){
+        if (err.message === "Invalid session ID") {
+            return res.status(400).json({ error: err.message });
+        }
+
+        if (err.message === "Session not found") {
+            return res.status(404).json({ error: err.message });
+        }
+
+        if (err.message === "Unauthorized") {
+            return res.status(403).json({ error: err.message });
         }
 
         return res.status(500).json({error: err.message});
