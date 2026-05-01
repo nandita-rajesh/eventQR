@@ -31,7 +31,12 @@ export const login = async (req, res) => {
     const user = await loginUser(email, password);
 
     res.json({
-      user,
+      user: {
+         _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      },
       token: generateToken(user),
     });
   } catch (err) {

@@ -86,3 +86,40 @@ export const deleteEventService = async (eventId, user) => {
 
     return true;
 }
+
+export const addSessionService = async (eventId, user, data) => {
+    const { name, description, startTime, endTime } = data;
+
+    if (!mongoose.Types.ObjectId.isValid(eventId)) {
+        throw new Error("Invalid event ID");
+    }
+
+    if (!name || !description || !startTime || !endTime) {
+        throw new Error("All fields required");
+    }
+
+    if (new Date(startTime) >= new Date(endTime)) {
+        throw new Error("Invalid session time");
+    }
+
+    const event = await Event.findById(eventId);
+
+    if (!event) {
+        throw new Error("Event not found");
+    }
+
+    if (event.organizer.toString() !== user.userId) {
+        throw new Error("Unauthorized");
+    }
+
+    const newSession = {
+        name,
+        description, 
+        startTime,
+        endTime,
+    };
+
+    event.sessions.push(newSession);
+
+    await event.save();
+}
