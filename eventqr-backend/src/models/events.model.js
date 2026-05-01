@@ -49,9 +49,9 @@ const eventSchema = new mongoose.Schema(
 
     sessions: [sessionSchema],
 
-    isPublished: {
+    isPublic: {
       type: Boolean,
-      default: false,
+      default: true,
     },
   },
   { timestamps: true }

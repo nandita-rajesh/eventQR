@@ -1,19 +1,41 @@
-import { createEventService, getMyEventsService } from "../services/events.service.js";
+import { createEventService, getEventByIdService, getMyEventsService } from "../services/events.service.js";
 
 export const createEvent = async (req, res) => {
-  try {
-    const event = await createEventService(req.body, req.user.userId);
-    res.status(201).json(event);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
+    try {
+        const event = await createEventService(req.body, req.user.id);
+        res.status(201).json(event);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
 };
 
 export const getMyEvents = async (req, res) => {
+    try {
+        const events = await getMyEventsService(req.user.id);
+        res.json(events);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+export const getEventById = async (req, res) => {
   try {
-    const events = await getMyEventsService(req.user.userId);
-    res.json(events);
+    const event = await getEventByIdService(
+        req.params.id,
+        req.user
+    );
+
+    return res.json(event);
+
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    if (err.message === "Event not found") {
+        return res.status(404).json({ error: err.message });
+    }
+
+    if (err.message === "Unauthorized") {
+        return res.status(403).json({ error: err.message });
+    }
+
+    return res.status(500).json({ error: err.message });
   }
 };

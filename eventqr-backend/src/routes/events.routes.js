@@ -1,6 +1,6 @@
 import express from "express";
 import { authMiddleware } from "../middleware/auth.middleware.js";
-import { createEvent, getMyEvents } from "../controllers/events.controller.js";
+import { createEvent, getEventById, getMyEvents } from "../controllers/events.controller.js";
 import { requireRole } from "../middleware/role.middleware.js";
 
 const router = express.Router();
@@ -57,7 +57,7 @@ router.post(
 
 /**
  * @swagger
- * /api/events:
+ * /events:
  *   get:
  *     summary: Get all events created by the logged-in organizer
  *     tags: [Events]
@@ -127,6 +127,13 @@ router.get(
     requireRole("organizer"),
     getMyEvents
 )
+
+router.get(
+    "/:id",
+    authMiddleware,
+    requireRole("organizer"),
+    getEventById
+);
 
 
 export default router;
