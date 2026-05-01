@@ -1,0 +1,99 @@
+.logoRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.logoRow h1 {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.logoIcon {
+  color: #2563eb;
+  font-size: 24px;
+}
+
+.title {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #6b7280;
+  margin-bottom: 18px;
+}
+
+.labelTop {
+  font-size: 14px;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.toggle {
+  display: flex;
+  background: #e5e7eb;
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 16px;
+}
+
+.toggle button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.toggle .active {
+  background-color: #2563eb;
+  color: white;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+label {
+  font-size: 14px;
+  color: #374151;
+}
+
+.button {
+  margin-top: 10px;
+  padding: 14px;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.footer {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+.footer span {
+  color: #2563eb;
+  cursor: pointer;
+}
+
+.back {
+  text-align: center;
+  margin-top: 40px;
+  color: #6b7280;
+  font-size: 16px;
+  cursor: pointer;
+}

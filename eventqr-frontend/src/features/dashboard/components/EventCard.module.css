@@ -1,0 +1,47 @@
+.card {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h3 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.status {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+/* status variations */
+.active {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.completed {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.date {
+  color: #6b7280;
+  font-size: 13px;
+  margin: 6px 0 10px;
+}
+
+.stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #374151;
+}
