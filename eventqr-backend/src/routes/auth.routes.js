@@ -1,5 +1,5 @@
 import express from "express";
-import { register, login, verifyOtp, forgotPassword, resetPassword, getMe} from "../controllers/auth.controller.js";
+import { register, login, verifyOtp, forgotPassword, resetPassword, getMe, resendOtp} from "../controllers/auth.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
@@ -89,6 +89,8 @@ router.post("/login", login);
  *         description: Account verified
  */
 router.post("/verify-otp", verifyOtp)
+
+router.post("/resend-otp", resendOtp);
 
 /**
  * @swagger
