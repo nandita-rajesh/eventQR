@@ -2,7 +2,7 @@ import User from "../models/user.model.js";
 import bcrypt from "bcrypt";
 import sendMail from "../utils/sendMail.js";
 
-export const registerUser = async (name, email, phoneNumber, password) => {
+export const registerUser = async (name, email, phoneNumber, password, role) => {
   const existing = await User.findOne({ email });
   if (existing) throw new Error("User already exists");
 
@@ -13,6 +13,7 @@ export const registerUser = async (name, email, phoneNumber, password) => {
     email,
     phoneNumber,
     password: hashedPassword,
+    role
   });
 
   return user;

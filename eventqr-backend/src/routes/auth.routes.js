@@ -30,6 +30,8 @@ const router = express.Router();
  *                 type: string
  *               password:
  *                 type: string
+ *               role:
+ *                 type: String
  *     responses:
  *       201:
  *         description: User registered successfully

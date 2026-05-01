@@ -4,13 +4,13 @@ import User from "../models/user.model.js";
 
 export const register = async (req, res) => {
   try {
-    const { name, email, phoneNumber, password } = req.body;
+    const { name, email, phoneNumber, password , role} = req.body;
 
-    if (!name || !email || !password || !phoneNumber) {
+    if (!name || !email || !password || !phoneNumber || !role) {
       return res.status(400).json({ error: "All fields required" });
     }
 
-    const user = await registerUser(name, email, phoneNumber, password);
+    const user = await registerUser(name, email, phoneNumber, password, role);
     await verifyAccountOtpSend(email);
     res.status(201).json({
       user
