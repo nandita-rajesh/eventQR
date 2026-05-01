@@ -1,6 +1,6 @@
 import express from "express";
 import { authMiddleware } from "../middleware/auth.middleware.js";
-import { createEvent, deleteEvent, getEventById, getMyEvents, updateEvent } from "../controllers/events.controller.js";
+import { addSession, createEvent, deleteEvent, getEventById, getMyEvents, updateEvent } from "../controllers/events.controller.js";
 import { requireRole } from "../middleware/role.middleware.js";
 
 const router = express.Router();
@@ -259,6 +259,87 @@ router.delete(
     authMiddleware,
     requireRole("organizer"),
     deleteEvent
+);
+
+/**
+ * @swagger
+ * /events/{id}/sessions:
+ *   post:
+ *     summary: Add a session to an event (organizer only)
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: 69f33253f9bfd1034e14cd6f
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - startTime
+ *               - endTime
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Opening Ceremony
+ *               description:
+ *                 type: string
+ *                 example: Welcome and introduction
+ *               startTime:
+ *                 type: string
+ *                 format: date-time
+ *                 example: 2026-05-10T09:00:00Z
+ *               endTime:
+ *                 type: string
+ *                 format: date-time
+ *                 example: 2026-05-10T10:00:00Z
+ *     responses:
+ *       201:
+ *         description: Session created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 _id:
+ *                   type: string
+ *                   example: 70a123abc456def7890abcd1
+ *                 name:
+ *                   type: string
+ *                   example: Opening Ceremony
+ *                 description:
+ *                   type: string
+ *                   example: Welcome and introduction
+ *                 startTime:
+ *                   type: string
+ *                   format: date-time
+ *                   example: 2026-05-10T09:00:00Z
+ *                 endTime:
+ *                   type: string
+ *                   format: date-time
+ *                   example: 2026-05-10T10:00:00Z
+ *       400:
+ *         description: Invalid input or session time
+ *       401:
+ *         description: Unauthorized (missing or invalid token)
+ *       403:
+ *         description: Forbidden (not organizer or not owner)
+ *       404:
+ *         description: Event not found
+ */
+router.post(
+    "/:id/sessions",
+    authMiddleware,
+    requireRole("organizer"),
+    addSession
 );
 
 export default router;

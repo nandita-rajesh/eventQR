@@ -6,6 +6,10 @@ const sessionSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    description: {
+      type: String, 
+      required: true,
+    },
     startTime: {
       type: Date,
       required: true,
@@ -53,6 +57,12 @@ const eventSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+
+    status: {
+      type: String,
+      enum: ["upcoming", "ongoing", "completed"],
+      default: "upcoming",
+    }
   },
   { timestamps: true }
 );

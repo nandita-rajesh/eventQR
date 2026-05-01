@@ -108,7 +108,7 @@ export const addSessionService = async (eventId, user, data) => {
         throw new Error("Event not found");
     }
 
-    if (event.organizer.toString() !== user.userId) {
+    if (event.organizer.toString() !== user.id) {
         throw new Error("Unauthorized");
     }
 
@@ -122,4 +122,6 @@ export const addSessionService = async (eventId, user, data) => {
     event.sessions.push(newSession);
 
     await event.save();
+
+    return event.sessions[event.sessions.length - 1];
 }
