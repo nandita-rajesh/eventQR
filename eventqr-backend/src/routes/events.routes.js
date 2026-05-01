@@ -1,6 +1,6 @@
 import express from "express";
 import { authMiddleware } from "../middleware/auth.middleware.js";
-import { createEvent, getEventById, getMyEvents } from "../controllers/events.controller.js";
+import { createEvent, deleteEvent, getEventById, getMyEvents, updateEvent } from "../controllers/events.controller.js";
 import { requireRole } from "../middleware/role.middleware.js";
 
 const router = express.Router();
@@ -126,8 +126,39 @@ router.get(
     authMiddleware,
     requireRole("organizer"),
     getMyEvents
-)
+);
 
+/**
+ * @swagger
+ * /events/{id}:
+ *   get:
+ *     summary: Get event details (organizer only)
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: 69f33253f9bfd1034e14cd6f
+ *     responses:
+ *       200:
+ *         description: Event retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       400:
+ *         description: Invalid event ID
+ *       401:
+ *         description: Unauthorized (missing or invalid token)
+ *       403:
+ *         description: Forbidden (not owner or not organizer)
+ *       404:
+ *         description: Event not found
+ */
 router.get(
     "/:id",
     authMiddleware,
@@ -135,5 +166,99 @@ router.get(
     getEventById
 );
 
+/**
+ * @swagger
+ * /events/{id}:
+ *   put:
+ *     summary: Update an event (organizer only)
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: 69f33253f9bfd1034e14cd6f
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: Updated Hackathon
+ *               description:
+ *                 type: string
+ *                 example: Updated description
+ *               date:
+ *                 type: string
+ *                 format: date
+ *                 example: 2026-05-10
+ *               venue:
+ *                 type: string
+ *                 example: New Venue
+ *               isPublished:
+ *                 type: boolean
+ *                 example: true
+ *     responses:
+ *       200:
+ *         description: Event updated successfully
+ *       400:
+ *         description: Invalid request or ID
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (not owner or not organizer)
+ *       404:
+ *         description: Event not found
+ */
+router.put(
+    "/:id",
+    authMiddleware,
+    requireRole("organizer"),
+    updateEvent   
+);
+
+/**
+ * @swagger
+ * /events/{id}:
+ *   delete:
+ *     summary: Delete an event (organizer only)
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: 69f33253f9bfd1034e14cd6f
+ *     responses:
+ *       200:
+ *         description: Event deleted successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Event deleted successfully
+ *       400:
+ *         description: Invalid event ID
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (not owner or not organizer)
+ *       404:
+ *         description: Event not found
+ */
+router.delete(
+    "/:id",
+    authMiddleware,
+    requireRole("organizer"),
+    deleteEvent
+);
 
 export default router;
