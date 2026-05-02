@@ -132,3 +132,15 @@ label {
   margin-top: 2px;
   margin-bottom: 10px;
 }
+
+.passwordWrapper {
+  position: relative;
+}
+
+.eye {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}

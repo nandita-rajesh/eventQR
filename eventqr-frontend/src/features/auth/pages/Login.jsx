@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import AuthCard from "../components/AuthCard";
 import AuthInput from "../components/AuthInput";
 import styles from "./Login.module.css";
-import { FaQrcode, FaEnvelope, FaLock } from "react-icons/fa";
+import { FaQrcode, FaEye, FaEyeSlash, FaEnvelope, FaLock } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../../../shared/api/authApi";
 
@@ -14,8 +14,14 @@ const Login = () => {
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
+  const emailRef = useRef(null);
+
+  useEffect(() => {
+    emailRef.current?.focus();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -31,6 +37,9 @@ const Login = () => {
       [name]: value,
     });
   };
+
+  const isValid =
+    form.email && /\S+@\S+\.\S+/.test(form.email) && form.password;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -49,6 +58,8 @@ const Login = () => {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
+      // focus first invalid field
+      if (newErrors.email) emailRef.current?.focus();
       return;
     }
 
@@ -76,7 +87,8 @@ const Login = () => {
       }
 
       setErrors({ general: message });
-
+      // clear password
+      setForm((prev) => ({ ...prev, password: "" }));
     } finally {
       setLoading(false);
     }
@@ -95,9 +107,10 @@ const Login = () => {
       </p>
 
       <form className={styles.form} onSubmit={handleSubmit}>
-        
-        <label>Email Address</label>
+        <label htmlFor="email">Email Address</label>
         <AuthInput
+          id="email"
+          ref={emailRef}
           type="email"
           name="email"
           placeholder="you@example.com"
@@ -105,37 +118,53 @@ const Login = () => {
           onChange={handleChange}
           icon={<FaEnvelope />}
           disabled={loading}
+          autoComplete="email"
+          autoFocus
+          aria-invalid={!!errors.email}
         />
-        {errors.email && (
-          <p className={styles.error}>{errors.email}</p>
-        )}
+        {errors.email && <p className={styles.error}>{errors.email}</p>}
 
-        <label>Password</label>
-        <AuthInput
-          type="password"
-          name="password"
-          placeholder="••••••••"
-          value={form.password}
-          onChange={handleChange}
-          icon={<FaLock />}
-          disabled={loading}
-        />
+        <label htmlFor="password">Password</label>
+        <div className={styles.passwordWrapper}>
+          <AuthInput
+            id="password"
+            type={showPassword ? "text" : "password"}
+            name="password"
+            placeholder="••••••••"
+            value={form.password}
+            onChange={handleChange}
+            icon={<FaLock />}
+            disabled={loading}
+            autoComplete="current-password"
+            aria-invalid={!!errors.password}
+          />
+
+          <span
+            className={styles.eye}
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </span>
+        </div>
         {errors.password && (
           <p className={styles.error}>{errors.password}</p>
         )}
 
         {errors.general && (
-          <p className={styles.error}>{errors.general}</p>
+          <p className={styles.error} role="alert" aria-live="assertive">
+            {errors.general}
+          </p>
         )}
 
         <div className={styles.row}>
-          <label className={styles.checkbox}>
-            <input type="checkbox" disabled={loading} /> Remember me
-          </label>
           <span className={styles.link}>Forgot password?</span>
         </div>
 
-        <button className={styles.button} disabled={loading}>
+        <button
+          type="submit"
+          className={styles.button}
+          disabled={!isValid || loading}
+        >
           {loading ? "Signing in..." : "Sign In"}
         </button>
       </form>
