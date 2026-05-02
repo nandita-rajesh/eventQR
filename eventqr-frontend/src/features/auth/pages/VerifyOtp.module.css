@@ -47,6 +47,20 @@
   font-size: 28px;
 }
 
+/* green check circle when verified */
+.iconCircleSuccess {
+  width: 70px;
+  height: 70px;
+  background: #ecfdf5;
+  color: #16a34a;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 15px;
+  font-size: 28px;
+}
+
 .title {
   font-size: 24px;
   font-weight: 600;
@@ -106,6 +120,30 @@
   cursor: pointer;
 }
 
+/* inline link-style button used for resend */
+.link {
+  background: transparent;
+  border: none;
+  color: #2563eb;
+  cursor: pointer;
+  padding: 0;
+  font-size: 14px;
+  text-decoration: underline;
+}
+.link:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+/* small success message shown after resend */
+.successSmall {
+  color: #16a34a;
+  font-size: 13px;
+  margin-top: 8px;
+  text-align: center;
+}
+
 .back {
   margin-top: 12px;
   color: #6b7280;
@@ -141,5 +179,12 @@
 .successSubtitle {
   font-size: 14px;
   color: #6b7280;
+  margin-top: 8px;
+}
+
+/* small redirect countdown text */
+.redirectSmall {
+  color: #6b7280;
+  font-size: 13px;
   margin-top: 8px;
 }

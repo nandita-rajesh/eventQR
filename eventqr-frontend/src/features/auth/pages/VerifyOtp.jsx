@@ -1,14 +1,22 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { verifyOtp } from "../../../shared/api/authApi";
+import { verifyOtp, resendOtp } from "../../../shared/api/authApi";
 import styles from "./VerifyOtp.module.css";
-import { FaShieldAlt, FaQrcode } from "react-icons/fa";
+import { FaShieldAlt, FaQrcode, FaCheckCircle } from "react-icons/fa";
 
 const VerifyOtp = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [redirectCountdown, setRedirectCountdown] = useState(0);
+
+  // resend state
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendError, setResendError] = useState("");
+  const [resendSuccess, setResendSuccess] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+  const cooldownRef = useRef(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -24,6 +32,7 @@ const VerifyOtp = () => {
     }
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
+      if (cooldownRef.current) clearInterval(cooldownRef.current);
     };
   }, [email, navigate]);
 
@@ -96,13 +105,21 @@ const VerifyOtp = () => {
         otp: finalOtp,
       });
 
-      // Hide inputs + show success
+      // Hide inputs + show success and start visible countdown
       setSuccess(true);
-
-      // Redirect after 3 sec (store timer to clear on unmount)
-      timerRef.current = setTimeout(() => {
-        navigate("/login");
-      }, 3000);
+      setRedirectCountdown(3);
+      // start countdown interval and navigate when reaches 0
+      timerRef.current = setInterval(() => {
+        setRedirectCountdown((c) => {
+          if (c <= 1) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+            navigate("/login");
+            return 0;
+          }
+          return c - 1;
+        });
+      }, 1000);
     } catch (err) {
       let message = "Invalid OTP";
 
@@ -116,6 +133,39 @@ const VerifyOtp = () => {
     }
   };
 
+  // resend OTP (verification type) with cooldown
+  const handleResend = async () => {
+    if (!email) return;
+    if (cooldown > 0) return;
+
+    setResendError("");
+    setResendSuccess(false);
+    setResendLoading(true);
+
+    try {
+      await resendOtp({ email, type: "verify" });
+      setResendSuccess(true);
+
+      // start 30s cooldown
+      setCooldown(30);
+      cooldownRef.current = setInterval(() => {
+        setCooldown((c) => {
+          if (c <= 1) {
+            clearInterval(cooldownRef.current);
+            cooldownRef.current = null;
+            return 0;
+          }
+          return c - 1;
+        });
+      }, 1000);
+    } catch (err) {
+      const msg = err.response?.data?.error || "Could not resend OTP";
+      setResendError(msg);
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.card}>
@@ -125,22 +175,23 @@ const VerifyOtp = () => {
           <h1>EventQR</h1>
         </div>
 
-        {/* Icon */}
-        <div className={styles.iconCircle}>
-          <FaShieldAlt />
+        {/* Icon - switches to green check on success */}
+        <div className={success ? styles.iconCircleSuccess : styles.iconCircle}>
+          {success ? <FaCheckCircle /> : <FaShieldAlt />}
         </div>
 
-        <h2 className={styles.title}>Verify Your Email</h2>
-        <p className={styles.subtitle}>
-          We've sent a 6-digit code to <br />
-          <span>{email}</span>
-        </p>
+        <h2 className={styles.title}>{success ? "Account Verified" : "Verify Your Email"}</h2>
+        {!success && (
+          <p className={styles.subtitle}>
+            We've sent a 6-digit code to <br />
+            <span>{email}</span>
+          </p>
+        )}
 
         {success ? (
           <div className={styles.successContainer}>
-            <h2 className={styles.successTitle}>Verified</h2>
-            <p className={styles.successSubtitle}>
-              Redirecting to login page...
+            <p className={styles.redirectSmall}>
+              Redirecting to login in {redirectCountdown}s...
             </p>
           </div>
         ) : (
@@ -173,13 +224,36 @@ const VerifyOtp = () => {
           </form>
         )}
 
-        <p className={styles.resend}>
-          Didn’t receive the code? <span>Resend OTP</span>
-        </p>
+        {!success && (
+          <>
+            <p className={styles.resend}>
+              Didn’t receive the code?{' '}
+              <button
+                type="button"
+                className={styles.link}
+                onClick={handleResend}
+                disabled={resendLoading || cooldown > 0}
+              >
+                {resendLoading
+                  ? 'Sending...'
+                  : cooldown > 0
+                  ? `Resend in ${cooldown}s`
+                  : 'Resend OTP'}
+              </button>
+            </p>
 
-        <p className={styles.back} onClick={() => navigate("/signup")}>
-          ← Back to Registration
-        </p>
+            {resendSuccess && (
+              <p className={styles.successSmall}>
+                Verification code sent to {email}
+              </p>
+            )}
+            {resendError && <p className={styles.error}>{resendError}</p>}
+
+            <p className={styles.back} onClick={() => navigate('/signup')}>
+              ← Back to Registration
+            </p>
+          </>
+        )}
       </div>
     </div>
   );
