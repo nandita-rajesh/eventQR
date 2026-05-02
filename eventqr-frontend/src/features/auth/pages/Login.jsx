@@ -1,10 +1,11 @@
+// ...existing code...
 import React, { useState, useRef, useEffect } from "react";
 import AuthCard from "../components/AuthCard";
 import AuthInput from "../components/AuthInput";
 import styles from "./Login.module.css";
 import { FaQrcode, FaEye, FaEyeSlash, FaEnvelope, FaLock } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../../../shared/api/authApi";
+import { loginUser, resendOtp } from "../../../shared/api/authApi";
 
 const Login = () => {
   const [form, setForm] = useState({
@@ -15,6 +16,11 @@ const Login = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  // resend state
+  const [showResend, setShowResend] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resendError, setResendError] = useState("");
 
   const navigate = useNavigate();
   const emailRef = useRef(null);
@@ -41,6 +47,28 @@ const Login = () => {
   const isValid =
     form.email && /\S+@\S+\.\S+/.test(form.email) && form.password;
 
+  const handleResend = async () => {
+    setResendError("");
+    if (!form.email) {
+      setErrors((prev) => ({ ...prev, email: "Enter email to resend code" }));
+      emailRef.current?.focus();
+      return;
+    }
+
+    try {
+      setResending(true);
+      await resendOtp({ email: form.email , type:"verify"});
+      // navigate to verify page with email in state
+      navigate("/verify-otp", { state: { email: form.email } });
+    } catch (err) {
+      let message = "Could not send OTP";
+      if (err.response?.data?.error) message = err.response.data.error;
+      setResendError(message);
+    } finally {
+      setResending(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -66,6 +94,7 @@ const Login = () => {
     try {
       setLoading(true);
       setErrors({});
+      setShowResend(false);
 
       const res = await loginUser(form);
 
@@ -84,6 +113,14 @@ const Login = () => {
 
       if (err.response?.data?.error) {
         message = err.response.data.error;
+      }
+
+      // if backend tells user is unverified, show resend CTA
+      if (
+        typeof message === "string" &&
+        message.toLowerCase().includes("verify")
+      ) {
+        setShowResend(true);
       }
 
       setErrors({ general: message });
@@ -151,11 +188,24 @@ const Login = () => {
         )}
 
         {errors.general && (
-          <p className={styles.error} role="alert" aria-live="assertive">
-            {errors.general}
-          </p>
+          <div className={styles.errorRow} role="alert" aria-live="assertive">
+            <span className={styles.errorText}>{errors.general}</span>
+
+            {showResend && (
+              <button
+                type="button"
+                className={styles.inlineAction}
+                onClick={handleResend}
+                disabled={resending}
+              >
+                {resending ? "Sending..." : "Verify"}
+              </button>
+            )}
+          </div>
         )}
 
+        {resendError && <p className={styles.error}>{resendError}</p>}
+        
         <div className={styles.row}>
           <span className={styles.link}>Forgot password?</span>
         </div>
@@ -182,3 +232,4 @@ const Login = () => {
 };
 
 export default Login;
+// ...existing code...

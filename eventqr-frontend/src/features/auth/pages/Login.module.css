@@ -144,3 +144,36 @@ label {
   transform: translateY(-50%);
   cursor: pointer;
 }
+
+.errorRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.errorText {
+  color: #e74c3c;
+  font-size: 0.9rem;
+  flex: 1;
+}
+
+.inlineAction {
+  background: none;
+  border: none;
+  color: #3498db;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  white-space: nowrap;
+}
+
+.inlineAction:hover {
+  text-decoration: underline;
+}
+
+.inlineAction:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

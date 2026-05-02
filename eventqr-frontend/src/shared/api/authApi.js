@@ -21,6 +21,12 @@ export const verifyOtp = async (data) => {
   return res.data;
 };
 
+// RESEND OTP / SEND VERIFICATION CODE
+export const resendOtp = async (data) => {
+  const res = await axios.post(`${API}/resend-otp`, data);
+  return res.data;
+};
+
 // GET CURRENT USER
 export const getCurrentUser = async () => {
   const token = localStorage.getItem("token");
