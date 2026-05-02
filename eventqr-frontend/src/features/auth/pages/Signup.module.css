@@ -58,10 +58,39 @@
   color: white;
 }
 
+.pageCenter {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  box-sizing: border-box;
+}
+
+/* Constrain the card width and add internal padding so it doesn't touch edges */
+.card {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 28px;
+  box-sizing: border-box;
+  border-radius: 12px;
+  background: white; /* keep card background consistent */
+}
+
 .form {
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+@media (max-width: 420px) {
+  .pageCenter {
+    padding: 28px 12px;
+  }
+  .card {
+    padding: 20px;
+  }
 }
 
 label {
