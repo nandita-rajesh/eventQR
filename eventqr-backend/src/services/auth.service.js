@@ -22,7 +22,7 @@ export const registerUser = async (name, email, phoneNumber, password, role) => 
 
 export const loginUser = async (email, password) => {
   const user = await User.findOne({ email });
-  if (!user) throw new Error("Invalid credentials");
+  if (!user) throw new Error("Account does not exist");
 
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) throw new Error("Invalid credentials");
