@@ -1,10 +1,15 @@
 /* Container */
 .container {
-  padding: 20px;
-  padding-top: 24px;
+  padding: 32px 48px;
   background: #f3f4f6;
   min-height: 100vh;
 }
+
+.contentWrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+  }
 
 /* ================= HEADER ================= */
 .topHeader {
@@ -51,8 +56,8 @@
 .titleRow {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20px;
+  align-items: center; /* change from flex-start */
+  margin-bottom: 24px;
 }
 
 .titleRow h1 {
@@ -68,14 +73,50 @@
 
 /* Button */
 .createBtn {
-  background: linear-gradient(to right, #2563eb, #3b82f6);
-  color: white;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #1e6fff; /* blue */
+  color: #fff;
   border: none;
-  padding: 16px 20px;
-  border-radius: 18px;
+  padding: 10px 16px;
+  border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
+  box-shadow: 0 6px 18px rgba(30,111,255,0.12);
 }
+
+.createIcon {
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* text shown next to the icon on larger screens */
+.createText {
+  display: inline-block;
+}
+
+/* Mobile: show only the icon (compact +) */
+@media (max-width: 768px) {
+  .createBtn {
+    padding: 8px;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    justify-content: center;
+  }
+
+  .createText {
+    display: none;
+  }
+
+  .createIcon {
+    font-size: 16px;
+  }
+}
+
 
 /* ================= SEARCH ================= */
 .searchContainer {
@@ -122,6 +163,28 @@
   margin-top: 40px;
 }
 
+/* Grid for event cards - 2 columns on desktop, 1 on small screens */
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 22px; /* increase */
+}
+
+@media (max-width: 768px) {
+  .cardsGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .searchContainer {
+    padding: 10px;
+  }
+
+  .titleRow {
+    margin-bottom: 16px;
+  }
+}
+
 /* ================= SIDEBAR ================= */
 .overlay {
   position: fixed;
@@ -150,6 +213,57 @@
 
 .show {
   left: 0;
+}
+
+/* Desktop layout: keep sidebar visible and adjust content */
+@media (min-width: 1024px) {
+  .overlay {
+    display: none;
+  }
+
+  .sidebar {
+    left: 0;
+    box-shadow: none;
+  }
+
+  .show {
+    left: 0;
+  }
+
+  /* hide mobile menu controls on desktop */
+  .menuIcon {
+    display: none;
+  }
+
+  .closeIcon {
+    display: none;
+  }
+
+  .contentWrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  /* shift main content to the right so sidebar doesn't overlap */
+  .container {
+    margin-left: 260px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  /* keep header aligned with content area */
+  .topHeader {
+    left: 260px;
+    width: calc(100% - 260px);
+    padding-left: 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
 }
 
 .sidebarTop {
