@@ -207,7 +207,7 @@ const Login = () => {
         {resendError && <p className={styles.error}>{resendError}</p>}
         
         <div className={styles.row}>
-          <span className={styles.link}>Forgot password?</span>
+          <button type="button" className={styles.linkButton} onClick={() => navigate('/forgot-password')}>Forgot password?</button>
         </div>
 
         <button

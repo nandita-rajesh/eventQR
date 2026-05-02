@@ -119,6 +119,22 @@ label {
   cursor: pointer;
 }
 
+/* more prominent inline button style for links (used for Forgot password) */
+.linkButton {
+  background: transparent;
+  border: none;
+  color: #2563eb;
+  cursor: pointer;
+  padding: 0;
+  font-size: 13px;
+  text-decoration: underline;
+}
+.linkButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
 .back {
   text-align: center;
   margin-top: 40px;

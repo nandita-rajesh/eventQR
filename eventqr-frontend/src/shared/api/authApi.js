@@ -27,6 +27,18 @@ export const resendOtp = async (data) => {
   return res.data;
 };
 
+// FORGOT PASSWORD - send OTP to email if user exists
+export const forgotPassword = async (data) => {
+  const res = await axios.post(`${API}/forgot-password`, data);
+  return res.data;
+};
+
+// RESET PASSWORD - verify otp and set new password
+export const resetPassword = async (data) => {
+  const res = await axios.post(`${API}/reset-password`, data);
+  return res.data;
+};
+
 // GET CURRENT USER
 export const getCurrentUser = async () => {
   const token = localStorage.getItem("token");

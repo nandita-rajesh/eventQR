@@ -4,6 +4,8 @@ import Signup from "../features/auth/pages/Signup";
 import OrganizerDashboard from "../features/dashboard/pages/OrganizerDashboard";
 import VolunteerDashboard from "../features/dashboard/pages/VolunteerDashboard";
 import VerifyOtp from "../features/auth/pages/VerifyOtp";
+import ForgotPassword from "../features/auth/pages/ForgotPassword";
+import ResetPassword from "../features/auth/pages/ResetPassword";
 
 
 const AppRoutes = () => {
@@ -16,6 +18,8 @@ const AppRoutes = () => {
         <Route path="/dashboard" element={<OrganizerDashboard />} />
         <Route path="/dashboard/volunteer" element={<VolunteerDashboard />} />
         <Route path="/verify-otp" element={<VerifyOtp />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
       </Routes>
     </BrowserRouter>
   );
