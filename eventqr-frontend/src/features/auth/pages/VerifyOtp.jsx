@@ -6,64 +6,89 @@ import { FaShieldAlt, FaQrcode } from "react-icons/fa";
 
 const VerifyOtp = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+
   const navigate = useNavigate();
   const location = useLocation();
 
   const email = location.state?.email;
 
-// handle input change
-const handleChange = (value, index) => {
-  if (!/^[0-9]?$/.test(value)) return;
+  // handle input change
+  const handleChange = (value, index) => {
+    if (!/^[0-9]?$/.test(value)) return;
 
-  const newOtp = [...otp];
-  newOtp[index] = value;
-  setOtp(newOtp);
+    setError(""); // clear error
 
-  if (value && index < 5) {
-    document.getElementById(`otp-${index + 1}`).focus();
-  }
-};
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
 
-const handleKeyDown = (e, index) => {
-  if (e.key === "Backspace" && !otp[index] && index > 0) {
-    document.getElementById(`otp-${index - 1}`).focus();
-  }
-};
+    if (value && index < 5) {
+      document.getElementById(`otp-${index + 1}`).focus();
+    }
+  };
 
-const handlePaste = (e) => {
-  const paste = e.clipboardData.getData("text").slice(0, 6);
+  const handleKeyDown = (e, index) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      document.getElementById(`otp-${index - 1}`).focus();
+    }
+  };
 
-  if (!/^\d+$/.test(paste)) return;
+  const handlePaste = (e) => {
+    const paste = e.clipboardData.getData("text").slice(0, 6);
 
-  const newOtp = paste.split("");
-  setOtp(newOtp);
+    if (!/^\d+$/.test(paste)) return;
 
-  document.getElementById(`otp-${newOtp.length - 1}`).focus();
-};
+    const newOtp = paste.split("");
+    setOtp(newOtp);
+
+    document.getElementById(`otp-${newOtp.length - 1}`).focus();
+  };
 
   // handle submit
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const finalOtp = otp.join("");
+    const finalOtp = otp.join("");
 
-  try {
-    const res = await verifyOtp({
-      email: email,
-      otp: finalOtp
-    });
+    // Show error if not 6 digits
+    if (finalOtp.length !== 6) {
+      setError("Enter a valid 6-digit OTP");
+      return;
+    }
 
-    console.log("OTP verified:", res);
+    try {
+      setLoading(true);
+      setError("");
 
-    alert("Account verified!");
+      const res = await verifyOtp({
+        email,
+        otp: finalOtp,
+      });
 
-    navigate("/"); // go to login
+      // Hide inputs + show success
+      setSuccess(true);
 
-  } catch (err) {
-    console.error(err.response?.data);
-    alert(err.response?.data?.error || "Invalid OTP");
-  }
-};
+      // Redirect after 3 sec
+      setTimeout(() => {
+        navigate("/login");
+      }, 3000);
+
+    } catch (err) {
+      let message = "Invalid OTP";
+
+      if (err.response?.data?.error) {
+        message = err.response.data.error;
+      }
+
+      setError(message);
+
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -82,40 +107,55 @@ const handleSubmit = async (e) => {
 
         <h2 className={styles.title}>Verify Your Email</h2>
         <p className={styles.subtitle}>
-            We've sent a 6-digit code to <br />
-            <span>{email}</span>
+          We've sent a 6-digit code to <br />
+          <span>{email}</span>
         </p>
 
-        {/* OTP Inputs */}
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.otpContainer} onPaste={handlePaste}>
-            {otp.map((digit, index) => (
-              <input
-                key={index}
-                id={`otp-${index}`}
-                type="text"
-                maxLength="1"
-                value={digit}
-                onChange={(e) => handleChange(e.target.value, index)}
-                onKeyDown={(e) => handleKeyDown(e, index)}
-                className={styles.otpInput}
-              />
-            ))}
+        {success ? (
+          <div className={styles.successContainer}>
+            <h2 className={styles.successTitle}>Verified</h2>
+            <p className={styles.successSubtitle}>
+              Redirecting to login page...
+            </p>
           </div>
+        ) : (
+          <form onSubmit={handleSubmit} className={styles.form}>
+            
+            <div className={styles.otpContainer} onPaste={handlePaste}>
+              {otp.map((digit, index) => (
+                <input
+                  key={index}
+                  id={`otp-${index}`}
+                  type="text"
+                  maxLength="1"
+                  value={digit}
+                  onChange={(e) => handleChange(e.target.value, index)}
+                  onKeyDown={(e) => handleKeyDown(e, index)}
+                  className={styles.otpInput}
+                  disabled={loading}
+                />
+              ))}
+            </div>
 
-          <button
-            className={styles.button}
-            disabled={otp.join("").length !== 6}
-          >
-            Verify & Continue
-          </button>
-        </form>
+            {error && <p className={styles.error}>{error}</p>}
+
+            <button
+              className={styles.button}
+              disabled={loading}
+            >
+              {loading ? "Verifying..." : "Verify & Continue"}
+            </button>
+          </form>
+        )}
 
         <p className={styles.resend}>
           Didn’t receive the code? <span>Resend OTP</span>
         </p>
 
-        <p className={styles.back}>
+        <p
+          className={styles.back}
+          onClick={() => navigate("/signup")}
+        >
           ← Back to Registration
         </p>
 

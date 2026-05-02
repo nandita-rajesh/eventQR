@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const API = "http://localhost:5000/api/auth";
+const BASE = import.meta.env.VITE_API_URL
+const API = `${BASE}/auth`;
 
 // LOGIN 
 export const loginUser = async (data) => {
@@ -16,10 +17,7 @@ export const registerUser = async (data) => {
 
 // VERIFY OTP
 export const verifyOtp = async (data) => {
-  const res = await axios.post(
-    "http://localhost:5000/api/auth/verify-otp",
-    data
-  );
+  const res = await axios.post(`${API}/verify-otp`, data);
   return res.data;
 };
 
