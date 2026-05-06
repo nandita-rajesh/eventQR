@@ -1,6 +1,6 @@
 import express from "express";
 import { authMiddleware } from "../middleware/auth.middleware.js";
-import { addSession, createEvent, deleteEvent, getEventById, getMyEvents, updateEvent } from "../controllers/events.controller.js";
+import { addParticipant, addSession, createEvent, deleteEvent, getEventById, getMyEvents, updateEvent } from "../controllers/events.controller.js";
 import { requireRole } from "../middleware/role.middleware.js";
 
 const router = express.Router();
@@ -340,6 +340,13 @@ router.post(
     authMiddleware,
     requireRole("organizer"),
     addSession
+);
+
+router.post(
+    "/:id/partcipant",
+    authMiddleware,
+    requireRole("organizer"),
+    addParticipant
 );
 
 export default router;

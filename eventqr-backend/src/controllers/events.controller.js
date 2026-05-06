@@ -1,4 +1,4 @@
-import { addSessionService, createEventService, deleteEventService, getEventByIdService, getMyEventsService, updateEventService } from "../services/events.service.js";
+import { addParticipantService, addSessionService, createEventService, deleteEventService, getEventByIdService, getMyEventsService, updateEventService } from "../services/events.service.js";
 
 export const createEvent = async (req, res) => {
     try {
@@ -101,5 +101,36 @@ export const addSession = async (req, res) => {
         }
 
         return res.status(400).json({error: err.message});
+    }
+}
+
+export const addParticipant = async (req, res) => {
+    try {
+        const participant = await addParticipantService(
+            req.params.id,
+            req.user,
+            req.body
+        );
+
+        return res.status(201).json(participant);
+
+    } catch(err){
+        if (err.message === "Invalid event ID"){
+            return res.status(400).json({ error: err.message });
+        }
+
+        if (err.message === "Event not found") {
+            return res.status(404).json({ error: err.message });
+        }
+
+        if (err.message === "Unauthorized") {
+            return res.status(403).json({ error: err.message });
+        }
+
+        if (err.message === "Duplicate participant"){
+            return res.status(400).json({ error: err.message });
+        }
+
+        return res.status(500).json({ error: err.message });
     }
 }

@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Event from "../models/events.model.js";
+import Participant from "../models/participant.model.js";
 
 export const createEventService = async (data, userId) => {
     const { title, description, date, venue } = data;
@@ -124,4 +125,46 @@ export const addSessionService = async (eventId, user, data) => {
     await event.save();
 
     return event.sessions[event.sessions.length - 1];
+}
+
+export const addParticipantService = async (eventId, user, data)=>{
+    const {name, email, phoneNumber} = data;
+
+    if (!mongoose.Types.ObjectId.isValid(eventId)) {
+        throw new Error("Invalid event ID");
+    }
+
+    if (!name || !email ){
+        throw new Error("All fields are required");
+    }
+
+    const event = await Event.findById(eventId);
+
+    if(!event){
+        throw new Error("Event not found");
+    }
+
+    if (event.organizer.toString() !== user.id) {
+        throw new Error("Unauthorized");
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+    const existing = await Participant.findOne({
+        email: normalizedEmail,
+        event: eventId,
+    });
+
+    if (existing) {
+        throw new Error("Duplicate participant");
+    }
+
+    const participant = await Participant.create({
+        name: name.trim(),
+        email: normalizedEmail,
+        phoneNumber: phoneNumber?.trim() || undefined,
+        event: eventId,
+        qrToken: uuidv4(),
+    });
+
+    return participant;
 }
