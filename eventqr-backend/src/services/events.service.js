@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 import Event from "../models/events.model.js";
 import Participant from "../models/participant.model.js";
+import fs from "fs";
+import csv from "csv-parser";
+import mongoose from "mongoose";
+import { v4 as uuidv4 } from "uuid";
 
 export const createEventService = async (data, userId) => {
     const { title, description, date, venue } = data;
@@ -190,4 +194,83 @@ export const getParticipantsService = async (eventId, user) => {
   }).sort({ createdAt: -1 });
 
   return participants;
+};
+
+export const uploadParticipantsCSVService = async (
+  eventId,
+  user,
+  filePath
+) => {
+
+  if (!mongoose.Types.ObjectId.isValid(eventId)) {
+    throw new Error("Invalid event ID");
+  }
+
+  const event = await Event.findById(eventId);
+
+  if (!event) {
+    throw new Error("Event not found");
+  }
+
+  if (event.organizer.toString() !== user.id) {
+    throw new Error("Unauthorized");
+  }
+
+  const participants = [];
+
+  return new Promise((resolve, reject) => {
+
+    fs.createReadStream(filePath)
+      .pipe(csv())
+
+      .on("data", (row) => {
+
+        // expected columns:
+        // name,email,phoneNumber
+
+        if (row.name && row.email) {
+
+          participants.push({
+            name: row.name.trim(),
+            email: row.email.toLowerCase().trim(),
+            phoneNumber: row.phoneNumber?.trim(),
+            event: eventId,
+            qrToken: uuidv4(),
+          });
+        }
+      })
+
+      .on("end", async () => {
+
+        try {
+
+          const inserted = [];
+
+          for (const participant of participants) {
+
+            const exists = await Participant.findOne({
+              email: participant.email,
+              event: eventId,
+            });
+
+            if (!exists) {
+
+              const created = await Participant.create(participant);
+
+              inserted.push(created);
+            }
+          }
+
+          fs.unlinkSync(filePath);
+
+          resolve(inserted);
+
+        } catch (err) {
+
+          reject(err);
+        }
+      })
+
+      .on("error", reject);
+  });
 };

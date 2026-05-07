@@ -1,4 +1,4 @@
-import { addParticipantService, addSessionService, createEventService, deleteEventService, getEventByIdService, getMyEventsService, getParticipantsService, updateEventService } from "../services/events.service.js";
+import { addParticipantService, addSessionService, createEventService, deleteEventService, getEventByIdService, getMyEventsService, getParticipantsService, updateEventService, uploadParticipantsCSVService } from "../services/events.service.js";
 
 export const createEvent = async (req, res) => {
     try {
@@ -160,5 +160,28 @@ export const getParticipants = async (req, res) => {
     }
 
     return res.status(500).json({ error: err.message });
+  }
+};
+
+export const uploadParticipantsCSV = async (req, res) => {
+  try {
+
+    const participants = await uploadParticipantsCSVService(
+      req.params.id,
+      req.user,
+      req.file.path
+    );
+
+    return res.status(201).json({
+      message: "Participants uploaded successfully",
+      count: participants.length,
+      participants,
+    });
+
+  } catch (err) {
+
+    return res.status(500).json({
+      error: err.message,
+    });
   }
 };

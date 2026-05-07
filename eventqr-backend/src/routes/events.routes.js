@@ -2,8 +2,13 @@ import express from "express";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { addParticipant, addSession, createEvent, deleteEvent, getEventById, getMyEvents, updateEvent } from "../controllers/events.controller.js";
 import { requireRole } from "../middleware/role.middleware.js";
+import multer from "multer";
 
 const router = express.Router();
+
+const upload = multer({
+  dest: "uploads/",
+});
 
 /**
  * @swagger
@@ -355,5 +360,14 @@ router.get(
     authMiddleware,
     requireRole("organizer", "volunteer"),
     
-)
+);
+
+router.post(
+  "/:id/participants/upload",
+  authMiddleware,
+  requireRole("organizer"),
+  upload.single("file"),
+  uploadParticipantsCSV
+);
+
 export default router;
