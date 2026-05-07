@@ -168,3 +168,26 @@ export const addParticipantService = async (eventId, user, data)=>{
 
     return participant;
 }
+
+export const getParticipantsService = async (eventId, user) => {
+
+  if (!mongoose.Types.ObjectId.isValid(eventId)) {
+    throw new Error("Invalid event ID");
+  }
+
+  const event = await Event.findById(eventId);
+
+  if (!event) {
+    throw new Error("Event not found");
+  }
+
+  if (event.organizer.toString() !== user.id) {
+    throw new Error("Unauthorized");
+  }
+
+  const participants = await Participant.find({
+    event: eventId,
+  }).sort({ createdAt: -1 });
+
+  return participants;
+};

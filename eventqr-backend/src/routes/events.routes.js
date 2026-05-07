@@ -349,4 +349,11 @@ router.post(
     addParticipant
 );
 
+
+router.get(
+    "/:id/participant",
+    authMiddleware,
+    requireRole("organizer", "volunteer"),
+    
+)
 export default router;
