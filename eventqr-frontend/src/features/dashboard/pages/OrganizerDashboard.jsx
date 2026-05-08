@@ -13,6 +13,7 @@ import {
   FaPlus
 } from "react-icons/fa";
 import Icon from "../../../shared/components/Icon";
+import Modal from "../../../shared/components/Modal";
 
 
 const OrganizerDashboard = () => {
@@ -86,6 +87,8 @@ const OrganizerDashboard = () => {
     .join("")
     .toUpperCase();
 
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
   const formatDate = (d) => {
     if (!d) return "";
     try {
@@ -154,11 +157,7 @@ const OrganizerDashboard = () => {
 
           <button
             className={styles.logoutButton}
-            onClick={() => {
-              localStorage.removeItem('token');
-              localStorage.removeItem('user');
-              navigate('/login');
-            }}
+            onClick={() => setShowLogoutConfirm(true)}
             aria-label="Log out"
           >
             <Icon name="logout" size={18} />
@@ -271,6 +270,21 @@ const OrganizerDashboard = () => {
               </div>
         </div>
       </div>
+
+      <Modal
+        isOpen={showLogoutConfirm}
+        title="Confirm Logout"
+        message="Are you sure you want to log out?"
+        onCancel={() => setShowLogoutConfirm(false)}
+        onConfirm={() => {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          setShowLogoutConfirm(false);
+          navigate('/login');
+        }}
+        confirmLabel="Log out"
+        cancelLabel="Cancel"
+      />
     </>
   );
 };
