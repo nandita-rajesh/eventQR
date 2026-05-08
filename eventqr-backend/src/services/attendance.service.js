@@ -188,3 +188,67 @@ export const getSessionParticipantsService = async (sessionId,user) => {
 
   return participants;
 };
+
+export const exportAttendanceCSVService = async (
+  eventId,
+  user
+) => {
+
+  if (!mongoose.Types.ObjectId.isValid(eventId)) {
+    throw new Error("Invalid event ID");
+  }
+
+  const event = await Event.findById(eventId);
+
+  if (!event) {
+    throw new Error("Event not found");
+  }
+
+  if (
+    user.role === "organizer" &&
+    event.organizer.toString() !== user.id
+  ) {
+    throw new Error("Unauthorized");
+  }
+
+  const participants = await Participant.find({
+    event: eventId,
+  });
+
+  // CSV headers
+  const headers = [
+    "Name",
+    "Email",
+    ...event.sessions.map((s) => s.name),
+  ];
+
+  const rows = [];
+
+  rows.push(headers.join(","));
+
+  // build rows
+  for (const participant of participants) {
+
+    const row = [
+      participant.name,
+      participant.email,
+    ];
+
+    for (const session of event.sessions) {
+
+      const attendance =
+        await Attendance.findOne({
+          participant: participant._id,
+          session: session._id,
+        });
+
+      row.push(
+        attendance ? "Present" : "Absent"
+      );
+    }
+
+    rows.push(row.join(","));
+  }
+
+  return rows.join("\n");
+};

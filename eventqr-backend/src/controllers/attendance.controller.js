@@ -1,4 +1,4 @@
-import { getEventReportService, getSessionParticipantsService, markManualAttendanceService, scanAttendanceService } from "../services/attendance.service.js";
+import { exportAttendanceCSVService, getEventReportService, getSessionParticipantsService, markManualAttendanceService, scanAttendanceService } from "../services/attendance.service.js";
 
 export const scanAttendance = async (req, res) => {
 
@@ -130,6 +130,49 @@ export const getSessionParticipants = async (req, res) => {
     }
 
     if (err.message === "Session not found") {
+      return res.status(404).json({error: err.message});
+    }
+
+    if (err.message === "Unauthorized") {
+      return res.status(403).json({error: err.message});
+    }
+
+    return res.status(500).json({error: err.message});
+  }
+};
+
+export const exportAttendanceCSV = async (
+  req,
+  res
+) => {
+
+  try {
+
+    const csv =
+      await exportAttendanceCSVService(
+        req.params.id,
+        req.user
+      );
+
+    res.setHeader(
+      "Content-Type",
+      "text/csv"
+    );
+
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=attendance-report.csv"
+    );
+
+    return res.status(200).send(csv);
+
+  } catch (err) {
+
+    if (err.message === "Invalid event ID") {
+      return res.status(400).json({error: err.message});
+    }
+
+    if (err.message === "Event not found") {
       return res.status(404).json({error: err.message});
     }
 

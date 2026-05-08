@@ -3,7 +3,7 @@ import express from "express";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { requireRole } from "../middleware/role.middleware.js";
 
-import { getEventReport, getSessionParticipants, markManualAttendance, scanAttendance } from "../controllers/attendance.controller.js";
+import { exportAttendanceCSV, getEventReport, getSessionParticipants, markManualAttendance, scanAttendance } from "../controllers/attendance.controller.js";
 
 const router = express.Router();
 
@@ -33,6 +33,13 @@ router.get(
   authMiddleware,
   requireRole("organizer", "volunteer"),
   getSessionParticipants
+);
+
+router.get(
+  "/events/:id/export",
+  authMiddleware,
+  requireRole("organizer", "volunteer"),
+  exportAttendanceCSV
 );
 
 export default router;
