@@ -5,7 +5,7 @@ import authRoutes from "./routes/auth.routes.js";
 import eventRoutes from "./routes/events.routes.js";
 import sessionRoutes from "./routes/sessions.routes.js";
 import attendanceRoutes from "./routes/attendance.routes.js";
-import userRoutes from "./routes/users.routes.js";
+import volunteerRoutes from "./routes/volunteer.routes.js";
 
 import swaggerUi from "swagger-ui-express";
 import specs from "./swagger.js";
@@ -21,6 +21,6 @@ app.use("/api/auth", authRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/sessions", sessionRoutes);
 app.use("/api/attendance", attendanceRoutes);
-app.use("/api/users", userRoutes);
+app.use("/api/volunteers", volunteerRoutes);
 
 export default app;

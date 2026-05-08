@@ -1,5 +1,5 @@
 import express from "express";
-import { searchVolunteers } from "../controllers/users.controller.js";
+import { getAssignedEvents, searchVolunteers } from "../controllers/volunteer.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { requireRole } from "../middleware/role.middleware.js";
 
@@ -7,7 +7,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /users/volunteers/search:
+ * /volunteers/search:
  *   get:
  *     summary: Search volunteers by name or email
  *     tags: [Volunteers]
@@ -51,10 +51,56 @@ const router = express.Router();
  *         description: Forbidden (not organizer)
  */
 router.get(
-  "/volunteers/search",
+  "/search",
   authMiddleware,
   requireRole("organizer"),
   searchVolunteers
+);
+
+/**
+ * @swagger
+ * /volunteers/me/events:
+ *   get:
+ *     summary: Get events assigned to the logged-in volunteer
+ *     tags: [Volunteers]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Assigned events fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                     example: 69f33253f9bfd1034e14cd6f
+ *                   title:
+ *                     type: string
+ *                     example: Hackathon 2026
+ *                   description:
+ *                     type: string
+ *                     example: Annual coding competition
+ *                   venue:
+ *                     type: string
+ *                     example: Main Auditorium
+ *                   date:
+ *                     type: string
+ *                     format: date
+ *                     example: 2026-03-10
+ *       401:
+ *         description: Unauthorized (missing or invalid token)
+ *       403:
+ *         description: Forbidden (not a volunteer)
+ */
+router.get(
+  "/me/events",
+  authMiddleware,
+  requireRole("volunteer"),
+  getAssignedEvents
 );
 
 export default router;

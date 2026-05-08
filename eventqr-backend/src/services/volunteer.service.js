@@ -1,4 +1,5 @@
 import User from "../models/user.model.js";
+import volunteerAssignment from "../models/volunteerAssignment.model.js";
 
 export const searchVolunteersService =
   async (query) => {
@@ -31,3 +32,12 @@ export const searchVolunteersService =
 
     return volunteers;
   };
+
+export const getAssignedEventsService = async (user) => {
+  const assignments = await volunteerAssignment.find({
+    volunteer: user.userId,
+  }).populate("event");
+
+  // return only events
+  return assignments.map((assignment) => assignment.event);
+};

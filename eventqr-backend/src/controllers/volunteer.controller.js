@@ -1,4 +1,4 @@
-import { searchVolunteersService } from "../services/users.service.js";
+import { getAssignedEventsService, searchVolunteersService } from "../services/volunteer.service.js";
 
 export const searchVolunteers = async (
   req,
@@ -24,6 +24,19 @@ export const searchVolunteers = async (
       });
     }
 
+    return res.status(500).json({
+      error: err.message,
+    });
+  }
+};
+
+export const getAssignedEvents = async (req, res) => {
+  try {
+    const events = await getAssignedEventsService(req.user);
+
+    return res.json(events);
+
+  } catch (err) {
     return res.status(500).json({
       error: err.message,
     });

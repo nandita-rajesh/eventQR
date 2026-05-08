@@ -521,4 +521,54 @@ router.get(
     searchParticipants
 );
 
+/**
+ * @swagger
+ * /events/{id}/volunteers:
+ *   post:
+ *     summary: Assign a volunteer to an event
+ *     tags: [Volunteers]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: 69f33253f9bfd1034e14cd6f
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - volunteerId
+ *             properties:
+ *               volunteerId:
+ *                 type: string
+ *                 example: 69f44efe92f62ce0cbcbeaf0
+ *     responses:
+ *       201:
+ *         description: Volunteer assigned successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: Volunteer assigned successfully
+ *       400:
+ *         description: Invalid request or duplicate assignment
+ *       401:
+ *         description: Unauthorized (missing or invalid token)
+ *       403:
+ *         description: Forbidden (not organizer or not owner)
+ *       404:
+ *         description: Event or volunteer not found
+ */
+router.post(
+  "/:id/volunteers",
+  authMiddleware,
+  requireRole("organizer"),
+  assignVolunteer
+);
+
 export default router;
