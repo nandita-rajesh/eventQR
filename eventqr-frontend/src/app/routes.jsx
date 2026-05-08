@@ -6,6 +6,8 @@ import VolunteerDashboard from "../features/dashboard/pages/VolunteerDashboard";
 import VerifyOtp from "../features/auth/pages/VerifyOtp";
 import ForgotPassword from "../features/auth/pages/ForgotPassword";
 import ResetPassword from "../features/auth/pages/ResetPassword";
+import EventDetail from "../features/dashboard/pages/EventDetail";
+import QRScanner from "../features/scanner/QRScanner";
 
 
 const AppRoutes = () => {
@@ -20,6 +22,9 @@ const AppRoutes = () => {
         <Route path="/verify-otp" element={<VerifyOtp />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/volunteer" element={<VolunteerDashboard />} />
+        <Route path="/volunteer/event/:id" element={<EventDetail />} />
+        <Route path="/scan/:id" element={<QRScanner />} />
       </Routes>
     </BrowserRouter>
   );

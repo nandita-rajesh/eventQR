@@ -1,0 +1,197 @@
+.page {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding-bottom: 40px;
+}
+
+/* HEADER */
+
+.mobileHeader {
+  height: 58px;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+}
+
+.cameraIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.backLink {
+  border: none;
+  background: transparent;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  font-size: 16px;
+  color: #475569;
+
+  cursor: pointer;
+}
+
+.headerCenter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.headerTitle {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* CARDS */
+
+.scannerCard,
+.infoCard {
+  background: white;
+  border-radius: 18px;
+  margin: 18px;
+  padding: 24px;
+  border: 1px solid #e5e7eb;
+}
+
+.sectionTitle,
+.cardTitle {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+/* CAMERA */
+.cameraArea {
+  height: 300px;
+  border-radius: 16px;
+  background: #08132f;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  color: #94a3b8;
+  margin-bottom: 24px;
+}
+
+.cameraIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cameraBtn {
+  width: 100%;
+  height: 50px;
+  border: none;
+  border-radius: 12px;
+  background: #2563eb;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cameraText {
+  text-align: center;
+  color: #64748b;
+  margin: 14px 0 26px;
+  font-size: 15px;
+}
+
+/* SESSION */
+
+.sessionSection label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.sessionSelect {
+  width: 100%;
+  height: 48px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 0 14px;
+  background: white;
+}
+
+/* RECENT SCANS */
+
+.scanItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 18px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+
+  margin-bottom: 16px;
+}
+
+.scanLeft {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.successIcon {
+  width: 40px;
+  height: 40px;
+
+  border-radius: 50%;
+
+  background: #dcfce7;
+  color: #16a34a;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-weight: 700;
+}
+
+.scanLeft h3 {
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.scanLeft span {
+  color: #64748b;
+  font-size: 14px;
+}
+
+.scanTime {
+  color: #64748b;
+  font-size: 14px;
+}
+
+/* STATS */
+
+.statsRow {
+  display: flex;
+  justify-content: space-between;
+
+  margin-bottom: 18px;
+
+  font-size: 16px;
+}
+
+.green {
+  color: #16a34a;
+}
+
+.red {
+  color: #dc2626;
+}
