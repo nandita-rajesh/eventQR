@@ -170,6 +170,66 @@
   gap: 22px; /* increase */
 }
 
+/* Simple skeleton card used while loading events */
+.skeletonCard {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  min-height: 120px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+}
+.skelTitle {
+  width: 60%;
+  height: 18px;
+  background: linear-gradient(90deg, #f3f4f6, #e9eefb, #f3f4f6);
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+.skelMeta {
+  width: 40%;
+  height: 14px;
+  background: linear-gradient(90deg, #f3f4f6, #e9eefb, #f3f4f6);
+  border-radius: 8px;
+  margin-bottom: 14px;
+}
+.skelRow {
+  width: 100%;
+  height: 10px;
+  background: linear-gradient(90deg, #f3f4f6, #e9eefb, #f3f4f6);
+  border-radius: 6px;
+}
+
+/* Empty state */
+.emptyState {
+  margin-top: 18px;
+  padding: 18px;
+  text-align: center;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+}
+
+.emptyIcon {
+  font-size: 36px;
+  color: #2563eb;
+  margin-bottom: 8px;
+}
+
+/* Lightweight inline empty placeholder for Past Events (not a card) */
+.emptyPast {
+  grid-column: 1 / -1; /* span full width of grid */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #6b7280;
+  padding: 12px 0;
+}
+.emptyPastIcon {
+  font-size: 28px;
+  color: #9ca3af; /* muted gray */
+}
+
 @media (max-width: 768px) {
   .cardsGrid {
     grid-template-columns: 1fr;
@@ -328,4 +388,24 @@
 .profile span {
   font-size: 12px;
   color: #6b7280;
+}
+
+/* Logout button used in sidebars */
+.logoutButton {
+  margin-left: auto;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 10px;
+  background: #f1f5f9; /* light neutral */
+  color: #374151;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.logoutButton:hover {
+  background: #e2e8f0;
+  color: #111827;
 }

@@ -3,6 +3,7 @@ import styles from "./OrganizerDashboard.module.css";
 import EventCard from "../components/EventCard";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { getOrganizerEvents } from "../../../shared/api/eventsApi";
 import {
   FaBars,
   FaQrcode,
@@ -11,10 +12,15 @@ import {
   FaClock,
   FaPlus
 } from "react-icons/fa";
+import Icon from "../../../shared/components/Icon";
 
 
 const OrganizerDashboard = () => {
   const [open, setOpen] = useState(false);
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,6 +34,44 @@ const OrganizerDashboard = () => {
     if (user.role !== "organizer") {
       navigate("/dashboard/volunteer");
     }
+
+    // fetch events for organizer
+    const token = localStorage.getItem("token");
+    if (!token) {
+      // no token -> redirect to login
+      localStorage.removeItem("user");
+      navigate("/login");
+      return;
+    }
+
+    let mounted = true;
+    const load = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const data = await getOrganizerEvents();
+        const items = Array.isArray(data) ? data : data?.events || [];
+        if (mounted) setEvents(items);
+      } catch (err) {
+        // handle 401 from backend (invalid token)
+        const status = err.response?.status || err.status || (err?.message && err.message.includes('Invalid token') ? 401 : null);
+        if (status === 401) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          navigate("/login");
+          return;
+        }
+        if (mounted) setError(err.response?.data?.error || err.message || "Could not fetch events");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    load();
+
+    return () => {
+      mounted = false;
+    };
   }, [navigate]);
   
   const user = JSON.parse(localStorage.getItem("user"));
@@ -41,6 +85,30 @@ const OrganizerDashboard = () => {
     .slice(0, 2)
     .join("")
     .toUpperCase();
+
+  const formatDate = (d) => {
+    if (!d) return "";
+    try {
+      const dt = new Date(d);
+      return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', year: 'numeric' }).format(dt);
+    } catch (e) {
+      return d;
+    }
+  };
+
+  // derive filtered lists once to avoid repeating logic in JSX
+  const matchesQuery = (ev) => {
+    if (!searchTerm) return true;
+    const q = searchTerm.toLowerCase();
+    return (
+      (ev.title || '').toLowerCase().includes(q) ||
+      (ev.description || '').toLowerCase().includes(q) ||
+      (ev.location || ev.venue || '').toLowerCase().includes(q)
+    );
+  };
+
+  const upcomingEvents = events.filter(e => (e.status === 'upcoming' || new Date(e.date) > new Date())).filter(matchesQuery);
+  const pastEvents = events.filter(e => (e.status === 'completed' || new Date(e.date) <= new Date())).filter(matchesQuery);
 
   return (
     <>
@@ -83,6 +151,18 @@ const OrganizerDashboard = () => {
                ? user.role.charAt(0).toUpperCase() + user.role.slice(1)
                  : "Organizer"}</span>
           </div>
+
+          <button
+            className={styles.logoutButton}
+            onClick={() => {
+              localStorage.removeItem('token');
+              localStorage.removeItem('user');
+              navigate('/login');
+            }}
+            aria-label="Log out"
+          >
+            <Icon name="logout" size={18} />
+          </button>
         </div>
 
       </div>
@@ -111,6 +191,8 @@ const OrganizerDashboard = () => {
                   type="text"
                   placeholder="Search events..."
                   className={styles.searchInput}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
                 <button className={styles.filterBtn}>Filter</button>
               </div>
@@ -121,27 +203,42 @@ const OrganizerDashboard = () => {
                 Upcoming Events
               </h2>
 
-              <div className={styles.cardsGrid}>
-                <EventCard
-                  title="AI Summit 2026"
-                  date="June 20, 2026"
-                  location="Grand Hotel"
-                  participants={0}
-                  sessions={4}
-                  volunteers={0}
-                  status="upcoming"
-                />
+              {loading ? (
+                <div className={styles.cardsGrid}>
+                  {[1,2].map((i) => (
+                    <div key={i} className={styles.skeletonCard}>
+                      <div className={styles.skelTitle} />
+                      <div className={styles.skelMeta} />
+                      <div className={styles.skelRow} />
+                    </div>
+                  ))}
+                </div>
+              ) : error ? (
+                <p className={styles.error}>{error}</p>
+              ) : (
+                <div className={styles.cardsGrid}>
+                  {upcomingEvents.map((ev) => (
+                    <EventCard
+                      key={ev.id || ev._id || ev.title}
+                      title={ev.title}
+                      date={formatDate(ev.date)}
+                      location={ev.location || ev.venue}
+                      participants={ev.participants ?? ev.attendees ?? ev.registeredCount ?? 0}
+                      sessions={Array.isArray(ev.sessions) ? ev.sessions.length : ev.sessions ?? 0}
+                      volunteers={ev.volunteers ?? ev.volunteersCount ?? 0}
+                      status={ev.status || (new Date(ev.date) > new Date() ? 'upcoming' : 'completed')}
+                    />
+                  ))}
+                </div>
+              )}
 
-                <EventCard
-                  title="Tech Conference 2026"
-                  date="May 15, 2026"
-                  location="Convention Center"
-                  participants={450}
-                  sessions={3}
-                  volunteers={5}
-                  status="upcoming"
-                />
-              </div>
+              {/* Empty state for upcoming */}
+              {!loading && !error && upcomingEvents.length === 0 && (
+                <div className={styles.emptyState}>
+                  <p>No upcoming events found.</p>
+                  <button className={styles.createBtn} onClick={() => navigate('/events/create')}>Create Event</button>
+                </div>
+              )}
 
               {/* Past */}
               <h2 className={styles.sectionTitle}>
@@ -150,25 +247,27 @@ const OrganizerDashboard = () => {
               </h2>
 
               <div className={styles.cardsGrid}>
-                <EventCard
-                  title="Startup Pitch Day"
-                  date="May 10, 2026"
-                  location="Innovation Hub"
-                  participants={120}
-                  sessions={2}
-                  volunteers={3}
-                  status="completed"
-                />
-
-                <EventCard
-                  title="Workshop: React Fundamentals"
-                  date="May 5, 2026"
-                  location="Tech Academy"
-                  participants={75}
-                  sessions={1}
-                  volunteers={2}
-                  status="completed"
-                />
+                {loading ? (
+                  <p />
+                ) : pastEvents.length === 0 ? (
+                  <div className={styles.emptyPast}>
+                    <FaClock className={styles.emptyPastIcon} aria-hidden="true" />
+                    <p>No past events yet.</p>
+                  </div>
+                ) : (
+                  pastEvents.map((ev) => (
+                    <EventCard
+                      key={ev.id || ev._id || ev.title}
+                      title={ev.title}
+                      date={formatDate(ev.date)}
+                      location={ev.location || ev.venue}
+                      participants={ev.participants ?? ev.attendees ?? ev.registeredCount ?? 0}
+                      sessions={Array.isArray(ev.sessions) ? ev.sessions.length : ev.sessions ?? 0}
+                      volunteers={ev.volunteers ?? ev.volunteersCount ?? 0}
+                      status={ev.status || (new Date(ev.date) > new Date() ? 'upcoming' : 'completed')}
+                    />
+                  ))
+                )}
               </div>
         </div>
       </div>
