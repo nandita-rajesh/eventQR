@@ -80,7 +80,7 @@ router.put(
 
 /**
  * @swagger
- * /api/sessions/{sessionId}:
+ * /sessions/{sessionId}:
  *   delete:
  *     summary: Delete a session (organizer only)
  *     tags: [Sessions]

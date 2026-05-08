@@ -3,8 +3,8 @@ import Event from "../models/events.model.js";
 import Participant from "../models/participant.model.js";
 import fs from "fs";
 import csv from "csv-parser";
-import mongoose from "mongoose";
 import { v4 as uuidv4 } from "uuid";
+import sendParticipantQr from "../utils/sendParticipantQR.js";
 
 export const createEventService = async (data, userId) => {
     const { title, description, date, venue } = data;
@@ -170,6 +170,8 @@ export const addParticipantService = async (eventId, user, data)=>{
         qrToken: uuidv4(),
     });
 
+    await sendParticipantQr(participant, event);
+
     return participant;
 }
 
@@ -254,10 +256,9 @@ export const uploadParticipantsCSVService = async (
             });
 
             if (!exists) {
-
-              const created = await Participant.create(participant);
-
-              inserted.push(created);
+                const created = await Participant.create(participant);
+                await sendParticipantQr(created, event);
+                inserted.push(created);
             }
           }
 
@@ -273,4 +274,129 @@ export const uploadParticipantsCSVService = async (
 
       .on("error", reject);
   });
+};
+
+export const searchParticipantsService = async (
+  eventId,
+  query,
+  user
+) => {
+
+  if (!mongoose.Types.ObjectId.isValid(eventId)) {
+    throw new Error("Invalid event ID");
+  }
+
+  if (!query) {
+    throw new Error("Search query required");
+  }
+
+  const event = await Event.findById(eventId);
+
+  if (!event) {
+    throw new Error("Event not found");
+  }
+
+  // organizer ownership check
+  if (
+    user.role === "organizer" &&
+    event.organizer.toString() !== user.id
+  ) {
+    throw new Error("Unauthorized");
+  }
+
+  const participants = await Participant.find({
+    event: eventId,
+
+    $or: [
+      {
+        name: {
+          $regex: query,
+          $options: "i",
+        },
+      },
+
+      {
+        email: {
+          $regex: query,
+          $options: "i",
+        },
+      },
+    ],
+  })
+    .limit(10)
+    .sort({ name: 1 });
+
+  return participants;
+};
+
+export const getEventAttendanceSummaryService = async (eventId, user) => {
+  if (!mongoose.Types.ObjectId.isValid(eventId)) {
+    throw new Error("Invalid event ID");
+  }
+
+  const event = await Event.findById(eventId);
+
+  if (!event) {
+    throw new Error("Event not found");
+  }
+
+  if (
+    user.role === "organizer" &&
+    event.organizer.toString() !== user.id
+  ) {
+    throw new Error("Unauthorized");
+  }
+
+  const totalParticipants =
+    await Participant.countDocuments({
+      event: eventId,
+    });
+
+  const totalAttendanceRecords =
+    await Attendance.countDocuments({
+      event: eventId,
+    });
+
+  return {
+    eventTitle: event.title,
+    totalParticipants,
+    totalAttendanceRecords,
+  };
+};
+
+export const resendParticipantQrService = async (eventId, participantId, user) => {
+
+  if (!mongoose.Types.ObjectId.isValid(eventId)) {
+    throw new Error("Invalid event ID");
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(participantId)) {
+    throw new Error("Invalid participant ID");
+  }
+
+  const event = await Event.findById(eventId);
+
+  if (!event) {
+    throw new Error("Event not found");
+  }
+
+  if (
+    user.role === "organizer" &&
+    event.organizer.toString() !== user.id
+  ) {
+    throw new Error("Unauthorized");
+  }
+
+  const participant = await Participant.findOne({
+    _id: participantId,
+    event: eventId,
+  });
+
+  if (!participant) {
+    throw new Error("Participant not found");
+  }
+
+  await sendParticipantQr(participant, event);
+
+  return true;
 };

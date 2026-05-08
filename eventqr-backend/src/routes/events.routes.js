@@ -1,13 +1,13 @@
 import express from "express";
 import { authMiddleware } from "../middleware/auth.middleware.js";
-import { addParticipant, addSession, createEvent, deleteEvent, getEventById, getMyEvents, updateEvent } from "../controllers/events.controller.js";
+import { addParticipant, addSession, createEvent, deleteEvent, getEventAttendanceSummary, getEventById, getMyEvents, getParticipants, resendParticipantQr, searchParticipants, updateEvent, uploadParticipantsCSV } from "../controllers/events.controller.js";
 import { requireRole } from "../middleware/role.middleware.js";
 import multer from "multer";
 
 const router = express.Router();
 
 const upload = multer({
-  dest: "uploads/",
+    dest: "uploads/",
 });
 
 /**
@@ -54,9 +54,9 @@ const upload = multer({
  *         description: Forbidden (not an organizer)
  */
 router.post(
-    "/" , 
-    authMiddleware, 
-    requireRole("organizer"), 
+    "/",
+    authMiddleware,
+    requireRole("organizer"),
     createEvent
 );
 
@@ -225,7 +225,7 @@ router.put(
     "/:id",
     authMiddleware,
     requireRole("organizer"),
-    updateEvent   
+    updateEvent
 );
 
 /**
@@ -347,27 +347,185 @@ router.post(
     addSession
 );
 
+/**
+ * @swagger
+ * /events/{id}/participants:
+ *   post:
+ *     summary: Add a participant to an event
+ *     tags: [Participants]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: 69f33253f9bfd1034e14cd6f
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Chinmay
+ *               email:
+ *                 type: string
+ *                 example: chinmay@gmail.com
+ *               phoneNumber:
+ *                 type: string
+ *                 example: 9999999999
+ *     responses:
+ *       201:
+ *         description: Participant added successfully
+ *       400:
+ *         description: Invalid input or duplicate participant
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Event not found
+ */
 router.post(
-    "/:id/partcipant",
+    "/:id/participants",
     authMiddleware,
     requireRole("organizer"),
     addParticipant
 );
 
-
+/**
+ * @swagger
+ * /events/{id}/participants:
+ *   get:
+ *     summary: Get all participants for an event
+ *     tags: [Participants]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: 69f33253f9bfd1034e14cd6f
+ *     responses:
+ *       200:
+ *         description: Participants fetched successfully
+ *       400:
+ *         description: Invalid event ID
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Event not found
+ */
 router.get(
-    "/:id/participant",
+    "/:id/participants",
     authMiddleware,
     requireRole("organizer", "volunteer"),
-    
+    getParticipants
+);
+
+/**
+ * @swagger
+ * /events/{id}/participants/upload:
+ *   post:
+ *     summary: Upload participants via CSV
+ *     tags: [Participants]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: 69f33253f9bfd1034e14cd6f
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - file
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       201:
+ *         description: Participants uploaded successfully
+ *       400:
+ *         description: Invalid CSV or invalid event ID
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Event not found
+ */
+router.post(
+    "/:id/participants/upload",
+    authMiddleware,
+    requireRole("organizer"),
+    upload.single("file"),
+    uploadParticipantsCSV
+);
+
+/**
+ * @swagger
+ * /events/{id}/participants/search:
+ *   get:
+ *     summary: Search participants by name or email
+ *     tags: [Participants]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: 69f33253f9bfd1034e14cd6f
+ *       - in: query
+ *         name: q
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: chin
+ *     responses:
+ *       200:
+ *         description: Matching participants fetched successfully
+ *       400:
+ *         description: Invalid event ID or missing query
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Event not found
+ */
+router.get(
+    "/:id/participants/search",
+    authMiddleware,
+    requireRole("organizer", "volunteer"),
+    searchParticipants
 );
 
 router.post(
-  "/:id/participants/upload",
+  "/:eventId/participants/:participantId/resend-qr",
   authMiddleware,
-  requireRole("organizer"),
-  upload.single("file"),
-  uploadParticipantsCSV
+  requireRole("organizer", "volunteer"),
+  resendParticipantQr
 );
 
 export default router;

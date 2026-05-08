@@ -21,8 +21,10 @@
     "mongoose": "^9.5.0",
     "multer": "^2.1.1",
     "nodemailer": "^8.0.7",
+    "qrcode": "^1.5.4",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

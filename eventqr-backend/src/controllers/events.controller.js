@@ -1,4 +1,4 @@
-import { addParticipantService, addSessionService, createEventService, deleteEventService, getEventByIdService, getMyEventsService, getParticipantsService, updateEventService, uploadParticipantsCSVService } from "../services/events.service.js";
+import { addParticipantService, addSessionService, createEventService, deleteEventService, getEventAttendanceSummaryService, getEventByIdService, getMyEventsService, getParticipantsService, resendParticipantQrService, searchParticipantsService, updateEventService, uploadParticipantsCSVService } from "../services/events.service.js";
 
 export const createEvent = async (req, res) => {
     try {
@@ -183,5 +183,108 @@ export const uploadParticipantsCSV = async (req, res) => {
     return res.status(500).json({
       error: err.message,
     });
+  }
+};
+
+export const searchParticipants = async (req, res) => {
+
+  try {
+    const participants = await searchParticipantsService(
+      req.params.id,
+      req.query.q,
+      req.user
+    );
+
+    return res.status(200).json(participants);
+
+  } catch (err) {
+
+    if (err.message === "Invalid event ID") {
+      return res.status(400).json({
+        error: err.message,
+      });
+    }
+
+    if (err.message === "Event not found") {
+      return res.status(404).json({
+        error: err.message,
+      });
+    }
+
+    if (err.message === "Search query required") {
+      return res.status(400).json({
+        error: err.message,
+      });
+    }
+
+    return res.status(500).json({
+      error: err.message,
+    });
+  }
+};
+
+export const getEventAttendanceSummary = async (req, res) => {
+  try {
+    const summary =
+      await getEventAttendanceSummaryService(
+        req.params.id,
+        req.user
+      );
+
+    return res.status(200).json(summary);
+
+  } catch (err) {
+
+    if (err.message === "Invalid event ID") {
+      return res.status(400).json({
+        error: err.message,
+      });
+    }
+
+    if (err.message === "Event not found") {
+      return res.status(404).json({
+        error: err.message,
+      });
+    }
+
+    if (err.message === "Unauthorized") {
+      return res.status(403).json({
+        error: err.message,
+      });
+    }
+
+    return res.status(500).json({
+      error: err.message,
+    });
+  }
+};
+
+export const resendParticipantQr = async (req, res) => {
+  try {
+    await resendParticipantQrService(
+      req.params.eventId,
+      req.params.participantId,
+      req.user
+    );
+
+    return res.status(200).json({
+      message: "QR code resent successfully",
+    });
+
+  } catch (err) {
+
+    if (err.message === "Invalid event ID" || err.message === "Invalid participant ID") {
+      return res.status(400).json({error: err.message});
+    }
+
+    if (err.message === "Event not found" || err.message === "Participant not found") {
+      return res.status(404).json({error: err.message});
+    }
+
+    if (err.message === "Unauthorized") {
+      return res.status(403).json({error: err.message});
+    }
+
+    return res.status(500).json({error: err.message});
   }
 };
