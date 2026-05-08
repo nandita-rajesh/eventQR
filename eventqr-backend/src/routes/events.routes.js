@@ -1,6 +1,6 @@
 import express from "express";
 import { authMiddleware } from "../middleware/auth.middleware.js";
-import { addParticipant, addSession, createEvent, deleteEvent, getEventAttendanceSummary, getEventById, getMyEvents, getParticipants, resendParticipantQr, searchParticipants, updateEvent, uploadParticipantsCSV } from "../controllers/events.controller.js";
+import { addParticipant, addSession, assignVolunteer, createEvent, deleteEvent, getEventAttendanceSummary, getEventById, getMyEvents, getParticipants, resendParticipantQr, searchParticipants, updateEvent, uploadParticipantsCSV } from "../controllers/events.controller.js";
 import { requireRole } from "../middleware/role.middleware.js";
 import multer from "multer";
 
@@ -519,13 +519,6 @@ router.get(
     authMiddleware,
     requireRole("organizer", "volunteer"),
     searchParticipants
-);
-
-router.post(
-  "/:eventId/participants/:participantId/resend-qr",
-  authMiddleware,
-  requireRole("organizer", "volunteer"),
-  resendParticipantQr
 );
 
 export default router;

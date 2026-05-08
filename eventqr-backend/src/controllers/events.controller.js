@@ -1,4 +1,4 @@
-import { addParticipantService, addSessionService, createEventService, deleteEventService, getEventAttendanceSummaryService, getEventByIdService, getMyEventsService, getParticipantsService, resendParticipantQrService, searchParticipantsService, updateEventService, uploadParticipantsCSVService } from "../services/events.service.js";
+import { addParticipantService, addSessionService, assignVolunteerService, createEventService, deleteEventService, getEventAttendanceSummaryService, getEventByIdService, getMyEventsService, getParticipantsService, resendParticipantQrService, searchParticipantsService, updateEventService, uploadParticipantsCSVService } from "../services/events.service.js";
 
 export const createEvent = async (req, res) => {
     try {
@@ -282,6 +282,63 @@ export const resendParticipantQr = async (req, res) => {
     }
 
     if (err.message === "Unauthorized") {
+      return res.status(403).json({error: err.message});
+    }
+
+    return res.status(500).json({error: err.message});
+  }
+};
+
+export const assignVolunteer = async (
+  req,
+  res
+) => {
+
+  try {
+
+    const assignment =
+      await assignVolunteerService(
+        req.params.eventId,
+        req.body.volunteerId,
+        req.user
+      );
+
+    return res.status(201).json({
+      message: "Volunteer assigned successfully",
+      assignment,
+    });
+
+  } catch (err) {
+
+    if (
+      err.message === "Invalid event ID" ||
+      err.message === "Invalid volunteer ID"
+    ) {
+      return res.status(400).json({error: err.message});
+    }
+
+    if (
+      err.message === "Event not found" ||
+      err.message === "Volunteer not found"
+    ) {
+      return res.status(404).json({error: err.message});
+    }
+
+    if (
+      err.message === "User is not a volunteer"
+    ) {
+      return res.status(400).json({error: err.message});
+    }
+
+    if (
+      err.message === "Volunteer already assigned"
+    ) {
+      return res.status(409).json({error: err.message});
+    }
+
+    if (
+      err.message === "Unauthorized"
+    ) {
       return res.status(403).json({error: err.message});
     }
 

@@ -5,6 +5,7 @@ import fs from "fs";
 import csv from "csv-parser";
 import { v4 as uuidv4 } from "uuid";
 import sendParticipantQr from "../utils/sendParticipantQR.js";
+import checkEventAccess from "../utils/checkEventAccess.js";
 
 export const createEventService = async (data, userId) => {
     const { title, description, date, venue } = data;
@@ -187,7 +188,13 @@ export const getParticipantsService = async (eventId, user) => {
     throw new Error("Event not found");
   }
 
-  if (event.organizer.toString() !== user.id) {
+  const hasAccess =
+    await checkEventAccess(
+      event,
+      user
+    );
+
+  if (!hasAccess) {
     throw new Error("Unauthorized");
   }
 
@@ -296,11 +303,13 @@ export const searchParticipantsService = async (
     throw new Error("Event not found");
   }
 
-  // organizer ownership check
-  if (
-    user.role === "organizer" &&
-    event.organizer.toString() !== user.id
-  ) {
+  const hasAccess =
+    await checkEventAccess(
+      event,
+      user
+    );
+
+  if (!hasAccess) {
     throw new Error("Unauthorized");
   }
 
@@ -340,10 +349,13 @@ export const getEventAttendanceSummaryService = async (eventId, user) => {
     throw new Error("Event not found");
   }
 
-  if (
-    user.role === "organizer" &&
-    event.organizer.toString() !== user.id
-  ) {
+  const hasAccess =
+    await checkEventAccess(
+      event,
+      user
+    );
+
+  if (!hasAccess) {
     throw new Error("Unauthorized");
   }
 
@@ -380,10 +392,13 @@ export const resendParticipantQrService = async (eventId, participantId, user) =
     throw new Error("Event not found");
   }
 
-  if (
-    user.role === "organizer" &&
-    event.organizer.toString() !== user.id
-  ) {
+  const hasAccess =
+    await checkEventAccess(
+      event,
+      user
+    );
+
+  if (!hasAccess) {
     throw new Error("Unauthorized");
   }
 
@@ -399,4 +414,65 @@ export const resendParticipantQrService = async (eventId, participantId, user) =
   await sendParticipantQr(participant, event);
 
   return true;
+};
+
+export const assignVolunteerService = async (
+  eventId,
+  volunteerId,
+  user
+) => {
+
+  if (!mongoose.Types.ObjectId.isValid(eventId)) {
+    throw new Error("Invalid event ID");
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(volunteerId)) {
+    throw new Error("Invalid volunteer ID");
+  }
+
+  const event = await Event.findById(eventId);
+
+  if (!event) {
+    throw new Error("Event not found");
+  }
+
+  const hasAccess =
+    await checkEventAccess(
+      event,
+      user
+    );
+
+  if (!hasAccess) {
+    throw new Error("Unauthorized");
+  }
+
+  const volunteer = await User.findById(
+    volunteerId
+  );
+
+  if (!volunteer) {
+    throw new Error("Volunteer not found");
+  }
+
+  if (volunteer.role !== "volunteer") {
+    throw new Error("User is not a volunteer");
+  }
+
+  const existingAssignment =
+    await VolunteerAssignment.findOne({
+      volunteer: volunteerId,
+      event: eventId,
+    });
+
+  if (existingAssignment) {
+    throw new Error("Volunteer already assigned");
+  }
+
+  const assignment =
+    await VolunteerAssignment.create({
+      volunteer: volunteerId,
+      event: eventId,
+    });
+
+  return assignment;
 };

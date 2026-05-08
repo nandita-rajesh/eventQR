@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import Participant from "../models/participant.model.js";
 import Event from "../models/events.model.js";
 import Attendance from "../models/attendance.model.js";
+import checkEventAccess from "../utils/checkEventAccess.js";
 
 export const scanAttendanceService = async (user, data) => {
 
@@ -28,6 +29,16 @@ export const scanAttendanceService = async (user, data) => {
 
   if (!event) {
     throw new Error("Event not found");
+  }
+
+  const hasAccess =
+    await checkEventAccess(
+      event,
+      user
+    );
+
+  if (!hasAccess) {
+    throw new Error("Unauthorized");
   }
 
   const session = event.sessions.id(sessionId);
@@ -90,6 +101,16 @@ export const markManualAttendanceService = async (
     throw new Error("Event not found");
   }
 
+  const hasAccess =
+    await checkEventAccess(
+      event,
+      user
+    );
+
+  if (!hasAccess) {
+    throw new Error("Unauthorized");
+  }
+
   const session = event.sessions.id(sessionId);
 
   if (!session) {
@@ -126,10 +147,13 @@ export const getEventReportService = async (eventId, user) => {
     throw new Error("Event not found");
   }
 
-  if (
-    user.role === "organizer" &&
-    event.organizer.toString() !== user.id
-  ) {
+  const hasAccess =
+    await checkEventAccess(
+      event,
+      user
+    );
+
+  if (!hasAccess) {
     throw new Error("Unauthorized");
   }
 
@@ -175,7 +199,13 @@ export const getSessionParticipantsService = async (sessionId,user) => {
 
   const event = attendanceRecords[0].event;
 
-  if (user.role === "organizer" && event.organizer.toString() !== user.id) {
+  const hasAccess =
+    await checkEventAccess(
+      event,
+      user
+    );
+
+  if (!hasAccess) {
     throw new Error("Unauthorized");
   }
 
@@ -204,10 +234,13 @@ export const exportAttendanceCSVService = async (
     throw new Error("Event not found");
   }
 
-  if (
-    user.role === "organizer" &&
-    event.organizer.toString() !== user.id
-  ) {
+  const hasAccess =
+    await checkEventAccess(
+      event,
+      user
+    );
+
+  if (!hasAccess) {
     throw new Error("Unauthorized");
   }
 
