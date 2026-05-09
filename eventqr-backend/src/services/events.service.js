@@ -6,6 +6,8 @@ import csv from "csv-parser";
 import { v4 as uuidv4 } from "uuid";
 import sendParticipantQr from "../utils/sendParticipantQR.js";
 import checkEventAccess from "../utils/checkEventAccess.js";
+import User from "../models/user.model.js";
+import volunteerAssignment from "../models/volunteerAssignment.model.js";
 
 export const createEventService = async (data, userId) => {
     const { title, description, date, venue } = data;
@@ -459,7 +461,7 @@ export const assignVolunteerService = async (
   }
 
   const existingAssignment =
-    await VolunteerAssignment.findOne({
+    await volunteerAssignment.findOne({
       volunteer: volunteerId,
       event: eventId,
     });
@@ -469,7 +471,7 @@ export const assignVolunteerService = async (
   }
 
   const assignment =
-    await VolunteerAssignment.create({
+    await volunteerAssignment.create({
       volunteer: volunteerId,
       event: eventId,
     });

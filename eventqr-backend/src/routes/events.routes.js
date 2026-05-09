@@ -565,7 +565,7 @@ router.get(
  *         description: Event or volunteer not found
  */
 router.post(
-  "/:id/volunteers",
+  "/:eventId/volunteers",
   authMiddleware,
   requireRole("organizer"),
   assignVolunteer

@@ -35,7 +35,7 @@ export const searchVolunteersService =
 
 export const getAssignedEventsService = async (user) => {
   const assignments = await volunteerAssignment.find({
-    volunteer: user.userId,
+    volunteer: user.id,
   }).populate("event");
 
   // return only events
