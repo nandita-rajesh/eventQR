@@ -1,4 +1,4 @@
-import { getAssignedEventsService, searchVolunteersService } from "../services/volunteer.service.js";
+import { getAssignedEventsService, getVolunteerEventDetailsService, searchVolunteersService } from "../services/volunteer.service.js";
 
 export const searchVolunteers = async (
   req,
@@ -37,6 +37,34 @@ export const getAssignedEvents = async (req, res) => {
     return res.json(events);
 
   } catch (err) {
+    return res.status(500).json({
+      error: err.message,
+    });
+  }
+};
+
+export const getVolunteerEventDetails = async (req, res) => {
+  try {
+    const event = await getVolunteerEventDetailsService(
+      req.params.eventId,
+      req.user
+    );
+
+    return res.json(event);
+
+  } catch (err) {
+    if (err.message === "Invalid event ID") {
+      return res.status(400).json({ error: err.message });
+    }
+
+    if (err.message === "Event not found") {
+      return res.status(404).json({ error: err.message });
+    }
+
+    if (err.message === "Unauthorized") {
+      return res.status(403).json({ error: err.message });
+    }
+
     return res.status(500).json({
       error: err.message,
     });

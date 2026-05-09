@@ -1,5 +1,5 @@
 import express from "express";
-import { getAssignedEvents, searchVolunteers } from "../controllers/volunteer.controller.js";
+import { getAssignedEvents, getVolunteerEventDetails, searchVolunteers } from "../controllers/volunteer.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 import { requireRole } from "../middleware/role.middleware.js";
 
@@ -101,6 +101,13 @@ router.get(
   authMiddleware,
   requireRole("volunteer"),
   getAssignedEvents
+);
+
+router.get(
+  "/events/:eventId",
+  authMiddleware,
+  requireRole("volunteer"),
+  getVolunteerEventDetails
 );
 
 export default router;

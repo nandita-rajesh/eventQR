@@ -571,4 +571,48 @@ router.post(
   assignVolunteer
 );
 
+/**
+ * @swagger
+ * /events/{eventId}/participants/{participantId}/resend-qr:
+ *   post:
+ *     summary: Resend QR code to a participant
+ *     tags: [Participants]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: eventId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: 69f33253f9bfd1034e14cd6f
+ *       - in: path
+ *         name: participantId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: 69f44efe92f62ce0cbcbeaf
+ *     responses:
+ *       200:
+ *         description: QR code resent successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: QR code resent successfully
+ *       400:
+ *         description: Invalid event ID or participant ID
+ *       401:
+ *         description: Unauthorized (missing or invalid token)
+ *       403:
+ *         description: Forbidden (not organizer or no access)
+ *       404:
+ *         description: Event or participant not found
+ */
+router.post(
+  "/:eventId/participants/:participantId/resend-qr",
+  authMiddleware,
+  requireRole("organizer", "volunteer"),
+  resendParticipantQr
+);
+
 export default router;
