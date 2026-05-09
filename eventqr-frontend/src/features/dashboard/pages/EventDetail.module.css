@@ -1,7 +1,9 @@
 .page {
   min-height: 100vh;
   background: #f5f5f5;
-  padding-bottom: 40px;
+  padding: 24px 20px 40px;
+  max-width: 980px;
+  margin: 0 auto;
 }
 
 /* HEADER */
@@ -54,11 +56,11 @@
 .eventCard {
   background: white;
   border-radius: 20px;
+  margin: 18px 0;
+  padding: 28px;
 
-  margin: 18px;
-  padding: 24px;
-
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e8eef6;
+  box-shadow: 0 6px 18px rgba(15,23,42,0.04);
 }
 
 .eventTop {
@@ -110,13 +112,17 @@
   margin-top: 30px;
   padding-top: 28px;
 
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid #eef2f7;
 
   display: flex;
-  justify-content: space-around;
+  justify-content: space-evenly;
+  align-items: center;
+
+  gap: 24px;
 }
 
 .stats div {
+  flex: 1;
   text-align: center;
 }
 
@@ -142,9 +148,9 @@
 .participantsCard {
   background: white;
   border-radius: 20px;
-  margin: 18px;
-  padding: 24px;
-  border: 1px solid #e5e7eb;
+  margin: 18px 0;
+  padding: 20px;
+  border: 1px solid #e8eef6;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -170,8 +176,7 @@
 }
 
 .participantList {
-  display: flex;
-  flex-direction: column;
+  display: block;
 }
 
 .participantRow {
@@ -192,24 +197,22 @@
 
 .tableHead {
   display: grid;
-  grid-template-columns: 1fr 1.6fr 1fr 1fr;
+  grid-template-columns: 1fr 1.6fr auto;
   gap: 16px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eef2f7;
   font-size: 14px;
   font-weight: 600;
-  min-width: 560px;
 }
 
 .tableRow {
   display: grid;
-  grid-template-columns: 1fr 1.6fr 1fr 1fr;
+  grid-template-columns: 1fr 1.6fr auto;
   gap: 16px;
   align-items: center;
-  padding: 18px 0;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 16px 0;
+  border-bottom: 1px solid #f1f5f9;
   font-size: 14px;
-  min-width: 560px;
 }
 
 .tableRow span {
@@ -242,4 +245,173 @@
 
   font-size: 13px;
   font-weight: 500;
+}
+
+/* Extra styles for sessions, resend button and responsive */
+.scanWrap {
+  display: flex;
+  align-items: center;
+}
+
+.resendBtn {
+  height: 36px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1px solid #e6eefc;
+  background: white;
+  color: #2563eb;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sessionsCard {
+  background: white;
+  border-radius: 12px;
+  margin: 18px 0;
+  padding: 20px;
+  border: 1px solid #e8eef6;
+  box-shadow: 0 6px 18px rgba(15,23,42,0.03);
+}
+
+.sessionList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sessionRow {
+  padding: 16px;
+  border-radius: 16px;
+  background: linear-gradient(
+    135deg,
+    #eff6ff,
+    #f8fafc
+  );
+  border: 1px solid #dbeafe;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.05);
+}
+
+.sessionRow h3 {
+  margin: 0 0 6px 0;
+  font-size: 16px;
+}
+
+.sessionMeta {
+  color: #64748b;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.emptyState {
+  padding: 14px 6px;
+  color: #64748b;
+}
+
+/* adapt participant table to three columns (name, email, action) */
+.tableHead {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr auto;
+  gap: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.tableRow {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 14px;
+}
+
+.tableHead,
+.tableRow {
+  text-align: left;
+}
+
+.tableHead span,
+.tableRow span {
+  justify-self: start;
+  text-align: left;
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 14px 12px 28px;
+  }
+
+  .eventCard,
+  .participantsCard,
+  .sessionsCard {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .eventTitle {
+    font-size: 20px;
+    margin-bottom: 18px;
+  }
+
+  .headerInfo h2 {
+    font-size: 16px;
+  }
+
+  .eventTop {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .scanWrap {
+    margin-top: 4px;
+    display: flex;
+    justify-content: stretch;
+  }
+
+  .scanBtn {
+    width: 100%;
+    height: 48px;
+    min-width: unset;
+  }
+
+  .stats {
+    gap: 12px;
+    margin-top: 22px;
+    padding-top: 20px;
+  }
+
+  .stats h3 {
+    font-size: 24px;
+  }
+
+  .participantsHeader {
+    margin-bottom: 16px;
+  }
+
+  .searchInput {
+    height: 46px;
+    margin-bottom: 18px;
+  }
+
+  /* IMPORTANT */
+  .participantList {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .participantTable,
+  .tableHead,
+  .tableRow {
+    min-width: 560px;
+  }
+
+  /* REMOVE WRAPPING */
+  .tableRow span,
+  .tableHead span {
+    white-space: nowrap;
+  }
 }
