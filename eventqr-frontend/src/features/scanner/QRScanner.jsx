@@ -331,29 +331,6 @@ export default function QRScanner() {
           ))
         )}
       </section>
-
-      {/* STATS */}
-
-      <section className={styles.infoCard}>
-        <h2 className={styles.cardTitle}>
-          Today's Statistics
-        </h2>
-
-        <div className={styles.statsRow}>
-          <span>Total Scans</span>
-          <strong>2</strong>
-        </div>
-
-        <div className={styles.statsRow}>
-          <span>Successful</span>
-          <strong className={styles.green}>2</strong>
-        </div>
-
-        <div className={styles.statsRow}>
-          <span>Failed</span>
-          <strong className={styles.red}>0</strong>
-        </div>
-      </section>
     </div>
   );
 }
