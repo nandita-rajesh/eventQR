@@ -149,6 +149,7 @@ export default function EventDetail() {
   if (!event) return <div className={styles.page}><p>Event not found</p></div>;
 
   const { title, description, venue, date, sessions = [], stats = {} } = event;
+  const canScan = event?.status === 'ongoing';
   return (
     <div className={layoutStyles.dashboardLayout}>
       {/* Sidebar */}
@@ -220,7 +221,9 @@ export default function EventDetail() {
           <div className={styles.scanWrap}>
             <button
               className={styles.scanBtn}
-              onClick={() => navigate(`/scan/${event._id}`)}
+              disabled={!canScan}
+              onClick={() => canScan && navigate(`/scan/${event._id}`)}
+              title={canScan ? 'Scan QR' : 'Scanning is only available when the event is ongoing'}
             >
               <Icon name="qr" size={18} />
               <span>Scan QR</span>

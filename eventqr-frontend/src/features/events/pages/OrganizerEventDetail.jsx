@@ -369,9 +369,19 @@ export default function OrganizerEventDetail() {
             <div className={styles.actionsRow}>
               <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
                 <div className={styles.scanWrap}>
-                  <button className={styles.scanBtn} onClick={() => navigate(`/scan/${eventData._id || eventData.id}`)}>
-                    <Icon name="qr" size={18} /><span>Scan QR</span>
-                  </button>
+                  {(() => {
+                    const canScan = eventData?.status === 'ongoing';
+                    return (
+                      <button
+                        className={styles.scanBtn}
+                        disabled={!canScan}
+                        onClick={() => canScan && navigate(`/scan/${eventData._id || eventData.id}`)}
+                        title={canScan ? 'Scan QR' : 'Scanning is only available when the event is ongoing'}
+                      >
+                        <Icon name="qr" size={18} /><span>Scan QR</span>
+                      </button>
+                    );
+                  })()}
                 </div>
 
                 <div className={styles.ellipsisWrap} ref={optionsRef}>

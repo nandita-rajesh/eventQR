@@ -136,6 +136,13 @@
   cursor: pointer;
 }
 
+.scanBtn[disabled] {
+  background: #bfdbfe; /* light blue */
+  color: #ffffffcc;
+  cursor: not-allowed;
+  opacity: 0.95;
+}
+
 /* STATS */
 
 .stats {
