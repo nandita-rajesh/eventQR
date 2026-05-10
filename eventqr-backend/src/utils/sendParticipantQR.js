@@ -121,10 +121,14 @@ const sendParticipantQr = async (participant, event) => {
             "
         >
             <img
-            src="cid:qrcode"
-            width="220"
-            height="220"
-            alt="QR Code"
+                src="cid:qrcode"
+                alt="QR Code"
+                style="
+                    width:220px;
+                    height:220px;
+                    display:block;
+                    margin:auto;
+                "
             />
         </div>
 
@@ -160,13 +164,12 @@ const sendParticipantQr = async (participant, event) => {
     `Your QR Code for ${event.title}`,
     html,
     [
-      {
-        filename: "qrcode.png",
-        content: base64Data,
-        encoding: "base64",
-        contentType: "image/png",
-        cid: "qrcode",
-    },
+        {
+  filename: "qrcode.png",
+  content: base64Data,
+  contentType: "image/png",
+  contentId: "qrcode",
+},
     ]
   );
 };
