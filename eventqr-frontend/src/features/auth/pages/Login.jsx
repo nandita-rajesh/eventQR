@@ -26,8 +26,26 @@ const Login = () => {
   const emailRef = useRef(null);
 
   useEffect(() => {
+    // If there's already a token + user in storage, redirect by role
+    const token = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
+    if (token && storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        if (parsedUser?.role === "organizer") {
+          navigate("/dashboard");
+          return;
+        } else {
+          navigate("/dashboard/volunteer");
+          return;
+        }
+      } catch (e) {
+        // parsing failed, fall through to focus email
+      }
+    }
+
     emailRef.current?.focus();
-  }, []);
+  }, [navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
