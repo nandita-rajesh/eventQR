@@ -63,7 +63,13 @@ export const scanAttendanceService = async (user, data) => {
     scannedBy: user.id,
   });
 
-  return attendance;
+  return {
+    participant: {
+      id: participant._id,
+      name: participant.name,
+      email: participant.email,
+    },
+  };
 };
 
 export const markManualAttendanceService = async (

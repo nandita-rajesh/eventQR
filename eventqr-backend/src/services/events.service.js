@@ -151,8 +151,14 @@ export const addParticipantService = async (eventId, user, data)=>{
         throw new Error("Event not found");
     }
 
-    if (event.organizer.toString() !== user.id) {
-        throw new Error("Unauthorized");
+    const hasAccess =
+      await checkEventAccess(
+        event,
+        user
+      );
+  
+    if (!hasAccess) {
+      throw new Error("Unauthorized");
     }
 
     const normalizedEmail = email.toLowerCase().trim();

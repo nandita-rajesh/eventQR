@@ -396,7 +396,7 @@ router.post(
 router.post(
     "/:id/participants",
     authMiddleware,
-    requireRole("organizer"),
+    requireRole("organizer", "volunteer"),
     addParticipant
 );
 
