@@ -159,9 +159,10 @@ export default function VolunteerDashboard() {
             ))
           ) : error ? (
             <p className={styles.error}>{error}</p>
-          ) : upcomingEvents.length === 0 && pastEvents.length === 0 ? (
+          ) : events.length === 0 ? (
             <div className={styles.emptyState}>
-              <p>No assigned events yet.</p>
+              <p>No events have been assigned to you yet.</p>
+              <p style={{color: '#64748b'}}>Once an organizer assigns you to an event, it will appear here.</p>
             </div>
           ) : (
             // render upcoming then past as separate groups
