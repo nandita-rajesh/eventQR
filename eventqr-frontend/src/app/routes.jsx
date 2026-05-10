@@ -8,6 +8,9 @@ import ForgotPassword from "../features/auth/pages/ForgotPassword";
 import ResetPassword from "../features/auth/pages/ResetPassword";
 import EventDetail from "../features/dashboard/pages/EventDetail";
 import QRScanner from "../features/scanner/QRScanner";
+import CreateEvent from "../features/events/pages/CreateEvent";
+import OrganizerEventDetail from "../features/events/pages/OrganizerEventDetail";
+
 
 
 const AppRoutes = () => {
@@ -25,6 +28,8 @@ const AppRoutes = () => {
         <Route path="/volunteer" element={<VolunteerDashboard />} />
         <Route path="/volunteer/event/:id" element={<EventDetail />} />
         <Route path="/scan/:id" element={<QRScanner />} />
+        <Route path="/events/create" element={<CreateEvent />}/>
+        <Route path="/events/:id" element={<OrganizerEventDetail />}/>
       </Routes>
     </BrowserRouter>
   );

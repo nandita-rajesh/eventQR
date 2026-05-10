@@ -5,20 +5,23 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getOrganizerEvents } from "../../../shared/api/eventsApi";
 import {
-  FaBars,
   FaQrcode,
   FaTimes,
   FaCalendarAlt,
   FaClock,
   FaPlus
-} from "react-icons/fa";
+} 
+from "react-icons/fa";
+import { HiOutlineMenu } from "react-icons/hi";
 import Icon from "../../../shared/components/Icon";
 import Modal from "../../../shared/components/Modal";
 
 
 const OrganizerDashboard = () => {
   const [open, setOpen] = useState(false);
-  const [events, setEvents] = useState([]);
+  const [events, setEvents] = useState(() => {
+    return JSON.parse(localStorage.getItem("events")) || [];
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -51,8 +54,17 @@ const OrganizerDashboard = () => {
       setError("");
       try {
         const data = await getOrganizerEvents();
-        const items = Array.isArray(data) ? data : data?.events || [];
-        if (mounted) setEvents(items);
+        const apiEvents = Array.isArray(data) ? data : data?.events || [];
+
+        // locally created events
+        const localEvents =
+          JSON.parse(localStorage.getItem("events")) || [];
+
+        // merge both
+        const mergedEvents = [...localEvents, ...apiEvents];
+
+        if (mounted) setEvents(mergedEvents);
+
       } catch (err) {
         // handle 401 from backend (invalid token)
         const status = err.response?.status || err.status || (err?.message && err.message.includes('Invalid token') ? 401 : null);
@@ -114,16 +126,33 @@ const OrganizerDashboard = () => {
   const pastEvents = events.filter(e => (e.status === 'completed' || new Date(e.date) <= new Date())).filter(matchesQuery);
 
   return (
-    <>
-      {/* ================= SIDEBAR ================= */}
-      {open && (
-        <div
-          className={styles.overlay}
-          onClick={() => setOpen(false)}
-        />
-      )}
+  <>
+    {/* OVERLAY */}
+    {open && (
+      <div
+        className={styles.overlay}
+        onClick={() => setOpen(false)}
+      />
+    )}
 
-      <div className={`${styles.sidebar} ${open ? styles.show : ""}`}>
+    {/* MOBILE TOPBAR */}
+    <header className={styles.topHeader}>
+      <div className={styles.leftHeader}>
+
+        <HiOutlineMenu
+          className={styles.mobileMenuIcon}
+          onClick={() => setOpen(true)}
+        />
+
+        <span className={styles.mobileTitle}>
+          EventQR
+        </span>
+
+      </div>
+    </header>
+
+    {/* SIDEBAR */}
+    <div className={`${styles.sidebar} ${open ? styles.show : ""}`}>
 
         {/* TOP */}
         <div>
@@ -172,13 +201,17 @@ const OrganizerDashboard = () => {
               {/* Title */}
               <div className={styles.titleRow}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+
                   <div>
                     <h1>My Events</h1>
                     <p>Manage your events and track attendance</p>
                   </div>
                 </div>
 
-                <button className={styles.createBtn}>
+                <button
+                  className={styles.createBtn}
+                  onClick={() => navigate("/events/create")}
+                >
                   <FaPlus className={styles.createIcon} aria-hidden="true" />
                   <span className={styles.createText}>Create Event</span>
                 </button>
@@ -218,6 +251,7 @@ const OrganizerDashboard = () => {
                 <div className={styles.cardsGrid}>
                   {upcomingEvents.map((ev) => (
                     <EventCard
+                      id={ev.id || ev._id}
                       key={ev.id || ev._id || ev.title}
                       title={ev.title}
                       date={formatDate(ev.date)}
@@ -256,6 +290,7 @@ const OrganizerDashboard = () => {
                 ) : (
                   pastEvents.map((ev) => (
                     <EventCard
+                      id={ev.id || ev._id}
                       key={ev.id || ev._id || ev.title}
                       title={ev.title}
                       date={formatDate(ev.date)}
