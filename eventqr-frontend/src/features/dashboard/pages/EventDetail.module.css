@@ -6,6 +6,36 @@
   margin: 0 auto;
 }
 
+/* Simple skeleton styles used while loading the event detail */
+.skeletonCard {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  min-height: 100px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+  margin: 12px 0;
+}
+.skelTitle {
+  width: 60%;
+  height: 20px;
+  background: linear-gradient(90deg, #f3f4f6, #e9eefb, #f3f4f6);
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+.skelMeta {
+  width: 40%;
+  height: 14px;
+  background: linear-gradient(90deg, #f3f4f6, #e9eefb, #f3f4f6);
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+.skelRow {
+  width: 100%;
+  height: 10px;
+  background: linear-gradient(90deg, #f3f4f6, #e9eefb, #f3f4f6);
+  border-radius: 6px;
+}
+
 /* HEADER */
 
 .mobileHeader {
@@ -260,6 +290,18 @@
   border: 1px solid #e6eefc;
   background: white;
   color: #2563eb;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* small add participant button used in participants header */
+.addBtn {
+  height: 36px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: none;
+  background: #2563eb;
+  color: white;
   font-weight: 600;
   cursor: pointer;
 }

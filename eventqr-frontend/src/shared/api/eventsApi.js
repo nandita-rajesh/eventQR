@@ -82,6 +82,30 @@ export const resendParticipantQR = async (eventId, participantId) => {
   return res.data;
 };
 
+// Add participant to event: POST /events/{eventId}/participants
+export const addEventParticipant = async (eventId, participant) => {
+  const token = localStorage.getItem('token');
+  if (!token) throw { status: 401, message: 'No token' };
+
+  const res = await axios.post(`${BASE}/events/${eventId}/participants`, participant, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  return res.data;
+};
+
+// Scan attendance: POST /attendance/scan { token, sessionId }
+export const scanAttendance = async (tokenValue, sessionId) => {
+  const token = localStorage.getItem('token');
+  if (!token) throw { status: 401, message: 'No token' };
+
+  const res = await axios.post(`${BASE}/attendance/scan`, { token: tokenValue, sessionId }, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  return res.data;
+};
+
 export default {
   getOrganizerEvents,
   getVolunteerEvents,

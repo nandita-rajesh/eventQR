@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import Icon from "../../../shared/components/Icon";
 import Modal from "../../../shared/components/Modal";
 import layoutStyles from "./VolunteerDashboard.module.css";
-import { getVolunteerEvent, getEventParticipants, searchEventParticipants, resendParticipantQR } from "../../../shared/api/eventsApi";
+import { getVolunteerEvent, getEventParticipants, searchEventParticipants, resendParticipantQR, addEventParticipant } from "../../../shared/api/eventsApi";
 
 import styles from "./EventDetail.module.css";
 
@@ -24,6 +24,14 @@ export default function EventDetail() {
   const [participantQuery, setParticipantQuery] = useState('');
   const [resendStatus, setResendStatus] = useState({});
   const [searching, setSearching] = useState(false);
+  // add participant on-spot
+  const [showAddParticipant, setShowAddParticipant] = useState(false);
+  const [addName, setAddName] = useState('');
+  const [addEmail, setAddEmail] = useState('');
+  const [addPhone, setAddPhone] = useState('');
+  const [addLoading, setAddLoading] = useState(false);
+  const [addError, setAddError] = useState('');
+  const [addSuccess, setAddSuccess] = useState('');
 
   useEffect(() => {
     let mounted = true;
@@ -113,7 +121,30 @@ export default function EventDetail() {
     };
   }, [participantQuery, id, navigate]);
 
-  if (loading) return <div className={styles.page}><p>Loading event…</p></div>;
+  if (loading) return (
+    <div className={styles.page}>
+      <article className={styles.skeletonCard} aria-hidden>
+        <div className={styles.skelTitle} />
+        <div className={styles.skelMeta} />
+        <div style={{height: 12}} />
+        <div className={styles.skelRow} />
+      </article>
+
+      <article className={styles.skeletonCard} aria-hidden>
+        <div className={styles.skelTitle} style={{width: '40%'}} />
+        <div style={{height: 12}} />
+        <div className={styles.skelRow} />
+        <div style={{height: 8}} />
+        <div className={styles.skelRow} />
+      </article>
+
+      <article className={styles.skeletonCard} aria-hidden>
+        <div className={styles.skelTitle} style={{width: '45%'}} />
+        <div style={{height: 12}} />
+        <div className={styles.skelRow} />
+      </article>
+    </div>
+  );
   if (error) return <div className={styles.page}><p className={styles.error}>{error}</p></div>;
   if (!event) return <div className={styles.page}><p>Event not found</p></div>;
 
@@ -223,7 +254,14 @@ export default function EventDetail() {
         <div className={styles.participantsHeader}>
           <Icon name="users" size={20} />
           <h2>Participants</h2>
+          <div style={{marginLeft: 'auto'}}>
+            <button className={styles.addBtn} onClick={() => { setShowAddParticipant(true); setAddError(''); setAddName(''); setAddEmail(''); setAddPhone(''); }}>
+              Add Participant
+            </button>
+          </div>
         </div>
+
+        {addSuccess && <div style={{marginBottom: 12}}><span className={styles.green}>{addSuccess}</span></div>}
 
         <input
           className={styles.searchInput}
@@ -322,6 +360,45 @@ export default function EventDetail() {
         confirmLabel="Log out"
         cancelLabel="Cancel"
       />
+
+      <Modal
+        isOpen={showAddParticipant}
+        title="Add Participant"
+        onCancel={() => setShowAddParticipant(false)}
+        onConfirm={async () => {
+          setAddError('');
+          if (!addName.trim() || !addEmail.trim()) {
+            setAddError('Name and email are required');
+            return;
+          }
+
+          setAddLoading(true);
+          try {
+            const payload = { name: addName.trim(), email: addEmail.trim(), phoneNumber: addPhone.trim() || undefined };
+            const data = await addEventParticipant(id, payload);
+            // try to extract created participant
+            const newP = data?.participant || data?.participantCreated || data || {};
+            setParticipants(prev => [newP, ...prev]);
+            setAddSuccess('Participant added — invitation sent');
+            setTimeout(() => setAddSuccess(''), 4000);
+            setShowAddParticipant(false);
+          } catch (err) {
+            const msg = err.response?.data?.error || err.message || 'Could not add participant';
+            setAddError(msg);
+          } finally {
+            setAddLoading(false);
+          }
+        }}
+        confirmLabel={addLoading ? 'Adding…' : 'Add'}
+        cancelLabel="Cancel"
+      >
+        <div style={{display: 'flex', flexDirection: 'column', gap: 10}}>
+          {addError && <div style={{color: '#dc2626'}}>{addError}</div>}
+          <input className={styles.searchInput} placeholder="Full name" value={addName} onChange={(e) => setAddName(e.target.value)} />
+          <input className={styles.searchInput} placeholder="Email" value={addEmail} onChange={(e) => setAddEmail(e.target.value)} />
+          <input className={styles.searchInput} placeholder="Phone (optional)" value={addPhone} onChange={(e) => setAddPhone(e.target.value)} />
+        </div>
+      </Modal>
     </div>
   );
 }
