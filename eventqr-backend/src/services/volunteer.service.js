@@ -38,12 +38,15 @@ export const searchVolunteersService =
   };
 
 export const getAssignedEventsService = async (user) => {
-  const assignments = await volunteerAssignment.find({
-    volunteer: user.id,
-  }).populate("event");
+  const assignments = await volunteerAssignment
+    .find({
+      volunteer: user.id,
+    })
+    .populate("event");
 
-  // return only events
-  return assignments.map((assignment) => assignment.event);
+  return assignments
+    .map((assignment) => assignment.event)
+    .filter(Boolean);
 };
 
 export const getVolunteerEventDetailsService = async (
