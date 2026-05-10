@@ -1,14 +1,15 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  FaArrowLeft,
-  FaQrcode,
-  FaCalendarAlt,
-  FaTimes
+    FaArrowLeft,
+    FaQrcode,
+    FaCalendarAlt,
 } from "react-icons/fa";
 import { HiOutlineMenu } from "react-icons/hi";
 import styles from "./CreateEvent.module.css";
 import Icon from "../../../shared/components/Icon";
+import { createEvent } from '../../../shared/api/eventsApi';
+
 
 export default function CreateEvent() {
   const navigate = useNavigate();
@@ -27,6 +28,8 @@ export default function CreateEvent() {
     date: "",
     venue: "",
   });
+    const [error, setError] = useState('');
+    const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -37,30 +40,34 @@ export default function CreateEvent() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+        // all fields mandatory: title, description, date, venue
+        if (!formData.title || !formData.description || !formData.date || !formData.venue) {
+            setError('All fields are required');
+            return;
+        }
 
-    const newEvent = {
-        id: Date.now(),
-        title: formData.title,
-        description: formData.description,
-        date: formData.date,
-        location: formData.venue,
-        participants: 0,
-        sessions: 0,
-        volunteers: 0,
-        status: "upcoming",
-    };
+        // call API to create event
+        (async () => {
+            setSubmitting(true);
+            setError('');
+            try {
+                const payload = {
+                    title: formData.title,
+                    description: formData.description,
+                    date: formData.date,
+                    venue: formData.venue,
+                };
 
-    // get old events
-    const existingEvents =
-        JSON.parse(localStorage.getItem("events")) || [];
-
-    // save updated list
-    localStorage.setItem(
-        "events",
-        JSON.stringify([...existingEvents, newEvent])
-    );
-
-    navigate("/dashboard");
+                const res = await createEvent(payload);
+                // expect 201 and response message; redirect to dashboard
+                navigate('/dashboard');
+            } catch (err) {
+                const msg = err.response?.data?.error || err.message || 'Could not create event';
+                setError(msg);
+            } finally {
+                setSubmitting(false);
+            }
+        })();
     };
 
   return (
@@ -105,11 +112,6 @@ export default function CreateEvent() {
                     EventQR
                     </span>
                 </div>
-
-                <FaTimes
-                    className={styles.closeIcon}
-                    onClick={() => setOpen(false)}
-                />
 
             </div>
 
@@ -185,6 +187,7 @@ export default function CreateEvent() {
             <h1>Create New Event</h1>
 
             <p>Fill in the details to create your event</p>
+            {error && <div style={{color: '#dc2626', marginBottom: 12}}>{error}</div>}
 
             <form onSubmit={handleSubmit}>
 
@@ -202,7 +205,7 @@ export default function CreateEvent() {
             </div>
 
             <div className={styles.formGroup}>
-                <label>Description</label>
+                <label>Description *</label>
 
                 <textarea
                 name="description"
@@ -210,6 +213,7 @@ export default function CreateEvent() {
                 rows="5"
                 value={formData.description}
                 onChange={handleChange}
+                required
                 />
             </div>
 
@@ -256,8 +260,9 @@ export default function CreateEvent() {
                 <button
                 type="submit"
                 className={styles.createBtn}
+                disabled={submitting}
                 >
-                Create Event
+                {submitting ? 'Creating…' : 'Create Event'}
                 </button>
 
             </div>

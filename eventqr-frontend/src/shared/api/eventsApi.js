@@ -45,6 +45,18 @@ export const getVolunteerEvent = async (id) => {
   return res.data;
 };
 
+// Get specific event for organizer by id
+export const getEvent = async (id) => {
+  const token = localStorage.getItem('token');
+  if (!token) throw { status: 401, message: 'No token' };
+
+  const res = await axios.get(`${EVENTS_API}/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  return res.data;
+};
+
 // Get participants for an event
 export const getEventParticipants = async (eventId) => {
   const token = localStorage.getItem('token');
@@ -94,12 +106,60 @@ export const addEventParticipant = async (eventId, participant) => {
   return res.data;
 };
 
+// Update an event: PUT /events/{id}
+export const updateEvent = async (eventId, payload) => {
+  const token = localStorage.getItem('token');
+  if (!token) throw { status: 401, message: 'No token' };
+
+  const res = await axios.put(`${EVENTS_API}/${eventId}`, payload, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  return res.data;
+};
+
+// Delete an event: DELETE /events/{id}
+export const deleteEvent = async (eventId) => {
+  const token = localStorage.getItem('token');
+  if (!token) throw { status: 401, message: 'No token' };
+
+  const res = await axios.delete(`${EVENTS_API}/${eventId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  return res.data;
+};
+
+// Add a session to an event: POST /events/{id}/sessions
+export const addEventSession = async (eventId, sessionPayload) => {
+  const token = localStorage.getItem('token');
+  if (!token) throw { status: 401, message: 'No token' };
+
+  const res = await axios.post(`${EVENTS_API}/${eventId}/sessions`, sessionPayload, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  return res.data;
+};
+
 // Scan attendance: POST /attendance/scan { token, sessionId }
 export const scanAttendance = async (tokenValue, sessionId) => {
   const token = localStorage.getItem('token');
   if (!token) throw { status: 401, message: 'No token' };
 
   const res = await axios.post(`${BASE}/attendance/scan`, { token: tokenValue, sessionId }, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  return res.data;
+};
+
+// Create a new event: POST /events
+export const createEvent = async (eventPayload) => {
+  const token = localStorage.getItem('token');
+  if (!token) throw { status: 401, message: 'No token' };
+
+  const res = await axios.post(`${EVENTS_API}`, eventPayload, {
     headers: { Authorization: `Bearer ${token}` },
   });
 
