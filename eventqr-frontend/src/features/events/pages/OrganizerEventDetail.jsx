@@ -405,7 +405,16 @@ export default function OrganizerEventDetail() {
           <div className={styles.statsGrid}><div className={styles.statCard}><h2>{eventData.participants || 0}</h2><p>Registered</p></div><div className={styles.statCard}><h2>{eventData.participants || 0}</h2><p>Attended</p></div><div className={styles.statCard}><h2>100%</h2><p>Attendance Rate</p></div></div>
         </div>
 
-        <div className={styles.actionGrid}><div className={styles.actionCard}><FaUsers className={styles.actionIcon} /><h3>Manage Participants</h3><p>View and manage participant list</p></div><div className={styles.actionCard}><FaUpload className={styles.actionIcon} /><h3>Upload CSV</h3><p>Bulk import participants</p></div><div className={styles.actionCard}><FaUserFriends className={styles.actionIcon} /><h3>Manage Volunteers</h3><p>Add volunteers for this event</p></div><div className={styles.actionCard}><FaChartBar className={styles.actionIcon} /><h3>Attendance Reports</h3><p>View detailed analytics</p></div></div>
+        <div className={styles.actionGrid}>
+          <div className={styles.actionCard} onClick={() => navigate(`/events/${eventData._id || eventData.id}/participants`)} style={{cursor: 'pointer'}}>
+            <FaUsers className={styles.actionIcon} />
+            <h3>Manage Participants</h3>
+            <p>View and manage participant list</p>
+          </div>
+          <div className={styles.actionCard}><FaUpload className={styles.actionIcon} /><h3>Upload CSV</h3><p>Bulk import participants</p></div>
+          <div className={styles.actionCard}><FaUserFriends className={styles.actionIcon} /><h3>Manage Volunteers</h3><p>Add volunteers for this event</p></div>
+          <div className={styles.actionCard}><FaChartBar className={styles.actionIcon} /><h3>Attendance Reports</h3><p>View detailed analytics</p></div>
+        </div>
 
         {/* Participants section */}
         <section className={styles.participantsCard}>
