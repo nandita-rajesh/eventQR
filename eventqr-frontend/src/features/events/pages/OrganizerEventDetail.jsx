@@ -100,6 +100,8 @@ export default function OrganizerEventDetail() {
   const [exportLoading, setExportLoading] = useState(false);
   const [exportError, setExportError] = useState('');
 
+  // volunteers management moved to dedicated page
+
   // fetch event
   useEffect(() => {
     let mounted = true;
@@ -177,6 +179,7 @@ export default function OrganizerEventDetail() {
     t = setTimeout(() => doSearch(), 300);
     return () => { mounted = false; clearTimeout(t); };
   }, [participantQuery, id, navigate]);
+
 
   // handlers
   const handleResend = async (participantId) => {
@@ -481,7 +484,7 @@ export default function OrganizerEventDetail() {
             <h3>Upload CSV</h3>
             <p>Bulk import participants</p>
           </div>
-          <div className={styles.actionCard}><FaUserFriends className={styles.actionIcon} /><h3>Manage Volunteers</h3><p>Add volunteers for this event</p></div>
+          <div className={styles.actionCard} onClick={() => navigate(`/events/${eventData._id || eventData.id}/volunteers`)} style={{cursor: 'pointer'}}><FaUserFriends className={styles.actionIcon} /><h3>Manage Volunteers</h3><p>Add volunteers for this event</p></div>
           <div className={styles.actionCard} style={{cursor: exportLoading ? 'not-allowed' : 'pointer'}} onClick={async () => {
             if (exportLoading) return;
             setExportError('');

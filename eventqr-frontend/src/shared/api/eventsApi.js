@@ -121,6 +121,43 @@ export const uploadParticipantsCSV = async (eventId, file) => {
   return res.data;
 };
 
+// Get volunteers assigned to an event: GET /events/{eventId}/volunteers
+export const getEventVolunteers = async (eventId) => {
+  const token = localStorage.getItem('token');
+  if (!token) throw { status: 401, message: 'No token' };
+
+  const res = await axios.get(`${BASE}/events/${eventId}/volunteers`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  return res.data;
+};
+
+// Assign a volunteer to an event: POST /events/{id}/volunteers
+export const assignVolunteer = async (eventId, volunteerId) => {
+  const token = localStorage.getItem('token');
+  if (!token) throw { status: 401, message: 'No token' };
+
+  const res = await axios.post(`${BASE}/events/${eventId}/volunteers`, { volunteerId }, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  return res.data;
+};
+
+// Search volunteers by name or email: GET /volunteers/search?q=...
+export const searchVolunteers = async (q) => {
+  const token = localStorage.getItem('token');
+  if (!token) throw { status: 401, message: 'No token' };
+
+  const res = await axios.get(`${BASE}/volunteers/search`, {
+    headers: { Authorization: `Bearer ${token}` },
+    params: { q },
+  });
+
+  return res.data;
+};
+
 // Export attendance report CSV: GET /attendance/events/{id}/export
 export const exportAttendanceCSV = async (eventId) => {
   const token = localStorage.getItem('token');
@@ -197,4 +234,7 @@ export const createEvent = async (eventPayload) => {
 export default {
   getOrganizerEvents,
   getVolunteerEvents,
+  getEventVolunteers,
+  assignVolunteer,
+  searchVolunteers,
 };

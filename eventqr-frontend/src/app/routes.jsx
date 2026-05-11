@@ -11,6 +11,7 @@ import QRScanner from "../features/scanner/QRScanner";
 import CreateEvent from "../features/events/pages/CreateEvent";
 import OrganizerEventDetail from "../features/events/pages/OrganizerEventDetail";
 import OrganizerEventParticipants from "../features/events/pages/OrganizerEventParticipants";
+import OrganizerEventVolunteers from "../features/events/pages/OrganizerEventVolunteers";
 
 
 
@@ -32,6 +33,7 @@ const AppRoutes = () => {
         <Route path="/events/create" element={<CreateEvent />}/>
         <Route path="/events/:id" element={<OrganizerEventDetail />}/>
         <Route path="/events/:id/participants" element={<OrganizerEventParticipants />} />
+        <Route path="/events/:id/volunteers" element={<OrganizerEventVolunteers />} />
       </Routes>
     </BrowserRouter>
   );
