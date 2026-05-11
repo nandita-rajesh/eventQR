@@ -1,6 +1,6 @@
 import express from "express";
 import { authMiddleware } from "../middleware/auth.middleware.js";
-import { addParticipant, addSession, assignVolunteer, createEvent, deleteEvent, getEventAttendanceSummary, getEventById, getMyEvents, getParticipants, resendParticipantQr, searchParticipants, updateEvent, uploadParticipantsCSV } from "../controllers/events.controller.js";
+import { addParticipant, addSession, assignVolunteer, createEvent, deleteEvent, getAssignedVolunteers, getEventAttendanceSummary, getEventById, getMyEvents, getParticipants, resendParticipantQr, searchParticipants, updateEvent, uploadParticipantsCSV } from "../controllers/events.controller.js";
 import { requireRole } from "../middleware/role.middleware.js";
 import multer from "multer";
 
@@ -569,6 +569,59 @@ router.post(
   authMiddleware,
   requireRole("organizer"),
   assignVolunteer
+);
+
+/**
+ * @swagger
+ * /events/{eventId}/volunteers:
+ *   get:
+ *     summary: Get volunteers assigned to an event
+ *     tags:
+ *       - Events
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: eventId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Event ID
+ *     responses:
+ *       200:
+ *         description: Assigned volunteers fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 volunteers:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       email:
+ *                         type: string
+ *                       role:
+ *                         type: string
+ *       400:
+ *         description: Invalid event ID
+ *       403:
+ *         description: Unauthorized
+ *       404:
+ *         description: Event not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/:eventId/volunteers",
+  authMiddleware,
+  requireRole("organizer"),
+  getAssignedVolunteers
 );
 
 /**

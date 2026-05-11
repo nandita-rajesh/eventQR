@@ -1,4 +1,4 @@
-import { addParticipantService, addSessionService, assignVolunteerService, createEventService, deleteEventService, getEventAttendanceSummaryService, getEventByIdService, getMyEventsService, getParticipantsService, resendParticipantQrService, searchParticipantsService, updateEventService, uploadParticipantsCSVService } from "../services/events.service.js";
+import { addParticipantService, addSessionService, assignVolunteerService, createEventService, deleteEventService, getAssignedVolunteersService, getEventAttendanceSummaryService, getEventByIdService, getMyEventsService, getParticipantsService, resendParticipantQrService, searchParticipantsService, updateEventService, uploadParticipantsCSVService } from "../services/events.service.js";
 
 export const createEvent = async (req, res) => {
     try {
@@ -271,7 +271,7 @@ export const resendParticipantQr = async (req, res) => {
       message: "QR code resent successfully",
     });
 
-  } catch (err) {
+  } catch (err) {search
 
     if (err.message === "Invalid event ID" || err.message === "Invalid participant ID") {
       return res.status(400).json({error: err.message});
@@ -343,5 +343,54 @@ export const assignVolunteer = async (
     }
 
     return res.status(500).json({error: err.message});
+  }
+};
+
+export const getAssignedVolunteers = async (
+  req,
+  res
+) => {
+
+  try {
+
+    const volunteers =
+      await getAssignedVolunteersService(
+        req.params.eventId,
+        req.user
+      );
+
+    return res.status(200).json({
+      volunteers,
+    });
+
+  } catch (err) {
+
+    if (
+      err.message === "Invalid event ID"
+    ) {
+      return res.status(400).json({
+        error: err.message,
+      });
+    }
+
+    if (
+      err.message === "Event not found"
+    ) {
+      return res.status(404).json({
+        error: err.message,
+      });
+    }
+
+    if (
+      err.message === "Unauthorized"
+    ) {
+      return res.status(403).json({
+        error: err.message,
+      });
+    }
+
+    return res.status(500).json({
+      error: err.message,
+    });
   }
 };

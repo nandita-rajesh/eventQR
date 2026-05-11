@@ -484,3 +484,48 @@ export const assignVolunteerService = async (
 
   return assignment;
 };
+
+export const getAssignedVolunteersService = async (
+  eventId,
+  user
+) => {
+
+  if (!mongoose.Types.ObjectId.isValid(eventId)) {
+    throw new Error("Invalid event ID");
+  }
+
+  const event = await Event.findById(eventId);
+
+  if (!event) {
+    throw new Error("Event not found");
+  }
+
+  const hasAccess =
+    await checkEventAccess(
+      event,
+      user
+    );
+
+  if (!hasAccess) {
+    throw new Error("Unauthorized");
+  }
+
+  const assignments =
+    await volunteerAssignment
+      .find({
+        event: eventId,
+      })
+      .populate(
+        "volunteer",
+        "-password"
+      );
+
+  const volunteers =
+    assignments
+      .map(
+        (assignment) => assignment.volunteer
+      )
+      .filter(Boolean);
+
+  return volunteers;
+};
