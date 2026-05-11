@@ -90,6 +90,16 @@ export default function OrganizerEventDetail() {
   const [sessionLoading, setSessionLoading] = useState(false);
   const [sessionError, setSessionError] = useState("");
 
+  // upload CSV
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [uploadFile, setUploadFile] = useState(null);
+  const [uploadError, setUploadError] = useState('');
+  const [uploadLoading, setUploadLoading] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState('');
+  // export attendance
+  const [exportLoading, setExportLoading] = useState(false);
+  const [exportError, setExportError] = useState('');
+
   // fetch event
   useEffect(() => {
     let mounted = true;
@@ -236,6 +246,61 @@ export default function OrganizerEventDetail() {
     } catch (err) {
       alert(err.response?.data?.error || err.message || 'Could not delete event');
     } finally { setDeleteLoading(false); setShowDeleteConfirm(false); }
+  };
+
+  // Validate CSV headers contain name and email (case-insensitive)
+  const validateCSVHeaders = (file) => {
+    return new Promise((resolve, reject) => {
+      if (!file) return reject(new Error('No file provided'));
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('Could not read file'));
+      reader.onload = () => {
+        const text = reader.result;
+        const firstLine = text.split(/\r?\n/)[0] || '';
+        // split CSV header by comma (basic)
+        const headers = firstLine.split(',').map(h => h.replace(/^\"|\"$/g, '').trim().toLowerCase());
+        const hasName = headers.some(h => h.includes('name'));
+        const hasEmail = headers.some(h => h.includes('email'));
+        if (!hasName || !hasEmail) return reject(new Error('CSV must include at least "name" and "email" headers'));
+        resolve(true);
+      };
+      // read only first 64KB to be safe
+      const blob = file.slice(0, 65536);
+      reader.readAsText(blob);
+    });
+  };
+
+  const handleConfirmUpload = async () => {
+    setUploadError('');
+    setUploadSuccess('');
+    if (!uploadFile) { setUploadError('Please select a CSV file'); return; }
+    const nameLower = (uploadFile.name || '').toLowerCase();
+    if (!nameLower.endsWith('.csv') && uploadFile.type !== 'text/csv') { setUploadError('Please select a .csv file'); return; }
+
+    setUploadLoading(true);
+    try {
+      await validateCSVHeaders(uploadFile);
+    } catch (err) {
+      setUploadLoading(false);
+      setUploadError(err.message || 'Invalid CSV headers');
+      return;
+    }
+
+    try {
+      const { uploadParticipantsCSV } = await import('../../../shared/api/eventsApi');
+      await uploadParticipantsCSV(id, uploadFile);
+      setUploadSuccess('Participants uploaded successfully');
+      setTimeout(() => setUploadSuccess(''), 4000);
+      // refresh participants list
+      try {
+        const refreshed = await getEventParticipants(id);
+        setParticipants(Array.isArray(refreshed) ? refreshed : refreshed?.participants || []);
+      } catch (e) { /* ignore refresh errors */ }
+      setShowUploadModal(false);
+      setUploadFile(null);
+    } catch (err) {
+      setUploadError(err.response?.data?.error || err.message || 'Could not upload CSV');
+    } finally { setUploadLoading(false); }
   };
 
   const handleAddSession = async () => {
@@ -411,9 +476,41 @@ export default function OrganizerEventDetail() {
             <h3>Manage Participants</h3>
             <p>View and manage participant list</p>
           </div>
-          <div className={styles.actionCard}><FaUpload className={styles.actionIcon} /><h3>Upload CSV</h3><p>Bulk import participants</p></div>
+          <div className={styles.actionCard} onClick={() => { setShowUploadModal(true); setUploadError(''); setUploadFile(null); }} style={{cursor: 'pointer'}}>
+            <FaUpload className={styles.actionIcon} />
+            <h3>Upload CSV</h3>
+            <p>Bulk import participants</p>
+          </div>
           <div className={styles.actionCard}><FaUserFriends className={styles.actionIcon} /><h3>Manage Volunteers</h3><p>Add volunteers for this event</p></div>
-          <div className={styles.actionCard}><FaChartBar className={styles.actionIcon} /><h3>Attendance Reports</h3><p>View detailed analytics</p></div>
+          <div className={styles.actionCard} style={{cursor: exportLoading ? 'not-allowed' : 'pointer'}} onClick={async () => {
+            if (exportLoading) return;
+            setExportError('');
+            setExportLoading(true);
+            try {
+              const { exportAttendanceCSV } = await import('../../../shared/api/eventsApi');
+              const res = await exportAttendanceCSV(eventData._id || eventData.id);
+              // try to extract filename from content-disposition
+              const cd = res.headers['content-disposition'] || res.headers['Content-Disposition'] || '';
+              let filename = `attendance_${eventData._id || eventData.id}.csv`;
+              const m = cd.match(/filename\*=UTF-8''(.+)$|filename="?([^";]+)"?/i);
+              if (m) filename = decodeURIComponent(m[1] || m[2]);
+              const blob = new Blob([res.data], { type: res.data.type || 'text/csv' });
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = filename;
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              window.URL.revokeObjectURL(url);
+            } catch (err) {
+              setExportError(err.response?.data?.error || err.message || 'Could not export attendance');
+            } finally { setExportLoading(false); }
+          }}>
+            <FaChartBar className={styles.actionIcon} />
+            <h3>Attendance Reports</h3>
+            <p>{exportLoading ? 'Exporting…' : 'Download attendance CSV'}</p>
+          </div>
         </div>
 
         {/* Participants section */}
@@ -479,6 +576,17 @@ export default function OrganizerEventDetail() {
             <input type="time" className={styles.searchInput} placeholder="Start time (HH:MM)" value={sessionStart} onChange={(e) => setSessionStart(e.target.value)} />
             <input type="time" className={styles.searchInput} placeholder="End time (HH:MM)" value={sessionEnd} onChange={(e) => setSessionEnd(e.target.value)} />
             <textarea className={styles.searchInput} placeholder="Description" value={sessionDesc} onChange={(e) => setSessionDesc(e.target.value)} style={{height: 80}} />
+          </div>
+        </Modal>
+
+        {/* Upload CSV modal */}
+        <Modal isOpen={showUploadModal} title="Upload Participants CSV" onCancel={() => setShowUploadModal(false)} onConfirm={handleConfirmUpload} confirmLabel={uploadLoading ? 'Uploading…' : 'Upload'} cancelLabel="Cancel">
+          <div style={{display: 'flex', flexDirection: 'column', gap: 10}}>
+            {uploadError && <div style={{color: '#dc2626'}}>{uploadError}</div>}
+            {uploadSuccess && <div style={{color: '#16a34a'}}>{uploadSuccess}</div>}
+            <div style={{fontSize: 13, color: '#64748b'}}>CSV must include at least these headers: <strong>name</strong>, <strong>email</strong></div>
+            <input type="file" accept=".csv,text/csv" onChange={(e) => { setUploadError(''); setUploadFile(e.target.files?.[0] || null); }} />
+            <div style={{fontSize: 13, color: '#64748b'}}>Select a CSV file with at least the columns mentioned above.</div>
           </div>
         </Modal>
       </div>

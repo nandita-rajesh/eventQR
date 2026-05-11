@@ -106,6 +106,34 @@ export const addEventParticipant = async (eventId, participant) => {
   return res.data;
 };
 
+// Upload participants via CSV: POST /events/{id}/participants/upload
+export const uploadParticipantsCSV = async (eventId, file) => {
+  const token = localStorage.getItem('token');
+  if (!token) throw { status: 401, message: 'No token' };
+
+  const form = new FormData();
+  form.append('file', file);
+
+  const res = await axios.post(`${BASE}/events/${eventId}/participants/upload`, form, {
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' },
+  });
+
+  return res.data;
+};
+
+// Export attendance report CSV: GET /attendance/events/{id}/export
+export const exportAttendanceCSV = async (eventId) => {
+  const token = localStorage.getItem('token');
+  if (!token) throw { status: 401, message: 'No token' };
+
+  const res = await axios.get(`${BASE}/attendance/events/${eventId}/export`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: 'text/csv' },
+    responseType: 'blob',
+  });
+
+  return res;
+};
+
 // Update an event: PUT /events/{id}
 export const updateEvent = async (eventId, payload) => {
   const token = localStorage.getItem('token');
