@@ -139,7 +139,7 @@ export const markManualAttendanceService = async (
     scannedBy: user.id,
   });
 
-  return attendance;
+  return {attendance, name: participant.name};
 };
 
 export const getEventReportService = async (eventId, user) => {

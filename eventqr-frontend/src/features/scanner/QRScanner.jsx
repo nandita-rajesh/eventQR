@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import Icon from "../../shared/components/Icon";
 import styles from "./QRScanner.module.css";
-import { getVolunteerEvent, scanAttendance } from "../../shared/api/eventsApi";
+import { getVolunteerEvent, scanAttendance, searchEventParticipants, markAttendanceManual } from "../../shared/api/eventsApi";
 import Webcam from "react-webcam";
 import jsQR from "jsqr";
 
@@ -23,6 +23,9 @@ export default function QRScanner() {
   const [mediaSupported, setMediaSupported] = useState(null); // null=unknown, true/false
   const [userMediaError, setUserMediaError] = useState('');
   const [toast, setToast] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchingParticipants, setSearchingParticipants] = useState(false);
 
   const showToast = (text, type = 'success') => {
     setToast({ text, type });
@@ -95,11 +98,10 @@ export default function QRScanner() {
             setScanError('');
             try {
               const res = await scanAttendance(token, selectedSession);
-              const participant = res?.attendance?.participant || res?.participant || res?.data?.participant;
-              const info = participant || res?.data || res || { token };
+              const info = normalizeScanResponse(res) || { token };
               setScans(prev => [{ ok: true, info, at: new Date() }, ...prev].slice(0, 10));
               const msg = res?.message || 'Attendance marked';
-              showToast(participant?.name ? `${participant.name} — ${msg}` : msg, 'success');
+              showToast(info?.name ? `${info.name} — ${msg}` : msg, 'success');
             } catch (err) {
               const msg = err.response?.data?.error || err.message || 'Scan failed';
               setScans(prev => [{ ok: false, info: { message: msg }, at: new Date() }, ...prev].slice(0, 10));
@@ -129,58 +131,77 @@ export default function QRScanner() {
   }, [cameraActive, selectedSession]);
 
   // Image upload fallback: decode an uploaded image using jsQR
-  const handleUpload = (file) => {
-    if (!file) return;
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = async () => {
+
+  // Manual participant search and mark attendance
+  useEffect(() => {
+    let t;
+    if (!searchQuery) { setSearchResults([]); setSearchingParticipants(false); return; }
+    setSearchingParticipants(true);
+    t = setTimeout(async () => {
       try {
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-        const maxW = 800;
-        const scale = Math.min(1, maxW / img.width);
-        const w = Math.floor(img.width * scale);
-        const h = Math.floor(img.height * scale);
-        canvas.width = w;
-        canvas.height = h;
-        ctx.drawImage(img, 0, 0, w, h);
-        const imageData = ctx.getImageData(0, 0, w, h);
-        const code = jsQR(imageData.data, imageData.width, imageData.height);
-        if (code?.data) {
-          const token = code.data.trim();
-          if (!selectedSession) {
-            const msg = 'Select a session before scanning';
-            setScanError(msg);
-            setScans(prev => [{ ok: false, info: { message: msg }, at: new Date() }, ...prev].slice(0, 10));
-            return;
-          }
-          setScanLoading(true);
-          try {
-            const res = await scanAttendance(token, selectedSession);
-            const participant = res?.attendance?.participant || res?.participant || res?.data?.participant;
-            const info = participant || res?.data || res || { token };
-            setScans(prev => [{ ok: true, info, at: new Date() }, ...prev].slice(0, 10));
-            const msg = res?.message || 'Attendance marked';
-            showToast(participant?.name ? `${participant.name} — ${msg}` : msg, 'success');
-          } catch (err) {
-            const msg = err.response?.data?.error || err.message || 'Scan failed';
-            setScans(prev => [{ ok: false, info: { message: msg }, at: new Date() }, ...prev].slice(0, 10));
-            setScanError(msg);
-            showToast(msg, 'error');
-          } finally {
-            setScanLoading(false);
-          }
-        } else {
-          setScanError('Could not detect a QR code in the uploaded image');
-        }
-      } catch (e) {
-        setScanError('Could not process uploaded image');
+        const res = await searchEventParticipants(id, searchQuery);
+        const items = Array.isArray(res) ? res : res?.participants || res?.data || [];
+        setSearchResults(items);
+      } catch (err) {
+        setSearchResults([]);
       } finally {
-        URL.revokeObjectURL(url);
+        setSearchingParticipants(false);
       }
-    };
-    img.onerror = () => { setScanError('Could not load image'); URL.revokeObjectURL(url); };
-    img.src = url;
+    }, 300);
+
+    return () => clearTimeout(t);
+  }, [searchQuery, id]);
+
+  const handleManualMark = async (participantId) => {
+    if (!selectedSession) { showToast('Select a session first', 'error'); return; }
+    setScanLoading(true);
+    try {
+      const res = await markAttendanceManual(participantId, selectedSession);
+      const info = normalizeScanResponse(res) || { id: participantId };
+      setScans(prev => [{ ok: true, info, at: new Date() }, ...prev].slice(0, 10));
+      const msg = res?.message || 'Attendance marked';
+      showToast(info?.name ? `${info.name} — ${msg}` : msg, 'success');
+    } catch (err) {
+      const msg = err.response?.data?.error || err.message || 'Could not mark attendance';
+      setScans(prev => [{ ok: false, info: { message: msg }, at: new Date() }, ...prev].slice(0, 10));
+      showToast(msg, 'error');
+    } finally {
+      setScanLoading(false);
+    }
+  };
+
+  const normalizeScanResponse = (res) => {
+    if (!res) return null;
+    // server may return different shapes; try multiple locations
+    // 1) res.attendance.attendance.participant (id string) with res.attendance.name
+    const attWrap = res?.attendance;
+    if (attWrap) {
+      const inner = attWrap.attendance || attWrap;
+      const pid = inner?.participant;
+      const name = attWrap?.name || inner?.name || res?.name;
+      if (pid) {
+        if (typeof pid === 'object') return pid;
+        return { id: pid, name };
+      }
+    }
+
+    // 2) res.participant could be object or id
+    if (res?.participant) {
+      if (typeof res.participant === 'object') return res.participant;
+      return { id: res.participant, name: res?.name };
+    }
+
+    // 3) nested res.data.participant
+    if (res?.data?.participant) {
+      if (typeof res.data.participant === 'object') return res.data.participant;
+      return { id: res.data.participant, name: res.data?.name || res?.name };
+    }
+
+    // 4) top-level name
+    if (res?.name) return { name: res.name };
+
+    // fallback: return res (may be token or message)
+    return res;
   };
 
   return (
@@ -278,10 +299,27 @@ export default function QRScanner() {
             ))}
           </select>
         </div>
-        {/* image upload fallback (for browsers that block camera) */}
+        {/* manual search fallback (for browsers that block camera) */}
         <div style={{marginTop: 12}}>
-          <label style={{display: 'block', marginBottom: 8}}>Upload QR image (fallback)</label>
-          <input type="file" accept="image/*" onChange={(e) => handleUpload(e.target.files?.[0])} />
+          <label style={{display: 'block', marginBottom: 8}}>Search participant (name or email)</label>
+          <input className={styles.searchInput} placeholder="Search by name or email" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+          <div style={{marginTop: 8}}>
+            {searchingParticipants ? (<div>Searching…</div>) : searchResults.length === 0 ? (<div style={{color: '#64748b'}}>No results</div>) : (
+              <div style={{maxHeight: 180, overflowY: 'auto'}}>
+                {searchResults.map(p => (
+                  <div key={p._id || p.id} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #eef2f7'}}>
+                    <div>
+                      <div style={{fontWeight: 600}}>{p.name}</div>
+                      <div style={{fontSize: 13, color: '#64748b'}}>{p.email}</div>
+                    </div>
+                    <div>
+                      <button className={styles.addBtn} onClick={() => handleManualMark(p._id || p.id)} disabled={scanLoading}>{scanLoading ? 'Marking…' : 'Mark attendance'}</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* explicit message when media is unsupported */}
@@ -317,9 +355,8 @@ export default function QRScanner() {
                 <div className={s.ok ? styles.successIcon : styles.failIcon}>
                   {s.ok ? '✓' : '✕'}
                 </div>
-
                 <div>
-                  <h3>{s.info?.name || s.info?.email || s.info?.message || s.info?.token || 'Unknown'}</h3>
+                  <h3>{s.info.name || 'Unknown'}</h3>
                   <span>{(sessions.find(ss => (ss._id||ss.id) === selectedSession)?.name) || ''}</span>
                 </div>
               </div>

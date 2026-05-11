@@ -219,6 +219,18 @@ export const scanAttendance = async (tokenValue, sessionId) => {
   return res.data;
 };
 
+// Manually mark attendance: POST /attendance/manual { participantId, sessionId }
+export const markAttendanceManual = async (participantId, sessionId) => {
+  const token = localStorage.getItem('token');
+  if (!token) throw { status: 401, message: 'No token' };
+
+  const res = await axios.post(`${BASE}/attendance/manual`, { participantId, sessionId }, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  return res.data;
+};
+
 // Create a new event: POST /events
 export const createEvent = async (eventPayload) => {
   const token = localStorage.getItem('token');
