@@ -11,6 +11,7 @@ import {
   FaQrcode,
   FaTimes,
   FaEllipsisV,
+  FaEdit,
 } from "react-icons/fa";
 import { HiOutlineMenu } from "react-icons/hi";
 
@@ -99,6 +100,15 @@ export default function OrganizerEventDetail() {
   // export attendance
   const [exportLoading, setExportLoading] = useState(false);
   const [exportError, setExportError] = useState('');
+
+  // status edit
+  const [showStatusEdit, setShowStatusEdit] = useState(false);
+  const [statusDraft, setStatusDraft] = useState(eventData?.status || '');
+  const [statusLoading, setStatusLoading] = useState(false);
+
+  useEffect(() => {
+    setStatusDraft(eventData?.status || '');
+  }, [eventData]);
 
   // volunteers management moved to dedicated page
 
@@ -249,6 +259,32 @@ export default function OrganizerEventDetail() {
     } catch (err) {
       alert(err.response?.data?.error || err.message || 'Could not delete event');
     } finally { setDeleteLoading(false); setShowDeleteConfirm(false); }
+  };
+
+  const statusClassName = (s) => {
+    if (!s) return '';
+    const key = 'status' + (s.charAt(0).toUpperCase() + s.slice(1));
+    return styles[key] || '';
+  };
+
+  const isOngoingStatus = (s) => {
+    if (!s) return false;
+    const key = String(s).toLowerCase();
+    return ['ongoing', 'in_progress', 'in-progress', 'active', 'running', 'started'].includes(key);
+  };
+
+  const handleSaveStatus = async () => {
+    if (!statusDraft) return;
+    setStatusLoading(true);
+    try {
+      const updated = await updateEvent(id, { status: statusDraft });
+      setEventData(prev => ({ ...prev, status: updated?.status || statusDraft }));
+      setShowStatusEdit(false);
+    } catch (err) {
+      alert(err.response?.data?.error || err.message || 'Could not update status');
+    } finally {
+      setStatusLoading(false);
+    }
   };
 
   // Validate CSV headers contain name and email (case-insensitive)
@@ -433,12 +469,40 @@ export default function OrganizerEventDetail() {
             <div>
               <h1>{eventData.title}</h1>
               <div className={styles.metaRow}><div className={styles.metaItem}><FaCalendarAlt /><span>{formatDate(eventData.date)}</span></div><div className={styles.metaItem}><FaMapMarkerAlt /><span>{eventData.venue || ''}</span></div></div>
+              {/* Status pill + inline editor */}
+              <div style={{ marginTop: 12, display: 'flex', gap: 8, alignItems: 'center' }}>
+                <button
+                  type="button"
+                  className={`${styles.statusPill} ${statusClassName(eventData?.status)}`}
+                  onClick={() => setShowStatusEdit(s => !s)}
+                  title="Edit status"
+                >
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ textTransform: 'capitalize', fontWeight: 700 }}>{eventData?.status || 'Unknown'}</span>
+                    <FaEdit className={styles.statusPillIcon} onClick={(e) => { e.stopPropagation(); setShowStatusEdit(s => !s); }} />
+                  </span>
+                </button>
+
+                {showStatusEdit && (
+                  <div className={styles.statusEditor}>
+                    <select className={styles.searchInput} value={statusDraft} onChange={(e) => setStatusDraft(e.target.value)}>
+                      <option value="upcoming">Upcoming</option>
+                      <option value="ongoing">Ongoing</option>
+                      <option value="completed">Completed</option>
+                    </select>
+                    <div style={{ display: 'flex', gap: 8, marginLeft: 8 }}>
+                      <button className={styles.addBtn} onClick={handleSaveStatus} disabled={statusLoading}>{statusLoading ? 'Saving…' : 'Save'}</button>
+                      <button className={styles.resendBtn} onClick={() => { setShowStatusEdit(false); setStatusDraft(eventData?.status || ''); }}>Cancel</button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
             <div className={styles.actionsRow}>
               <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
                 <div className={styles.scanWrap}>
                   {(() => {
-                    const canScan = eventData?.status === 'ongoing';
+                    const canScan = isOngoingStatus(eventData?.status);
                     return (
                       <button
                         className={styles.scanBtn}

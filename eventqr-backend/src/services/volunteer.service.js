@@ -101,6 +101,7 @@ export const getVolunteerEventDetailsService = async (
     venue: event.venue,
     date: event.date,
     sessions: event.sessions,
+    status: event.status,
     stats: {
       totalParticipants,
       checkedIn,

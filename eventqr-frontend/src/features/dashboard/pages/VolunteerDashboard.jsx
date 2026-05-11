@@ -171,7 +171,11 @@ export default function VolunteerDashboard() {
                 <article key={ev._id || ev.id || ev.title} className={styles.eventCard}>
                   <div className={styles.eventCardHead}>
                     <h3 className={styles.eventName}>{ev.title}</h3>
-                    <span className={`${styles.pill} ${styles[`pill${ev.status || 'upcoming'}`]}`}>{ev.status}</span>
+                    {(() => {
+                      const statusKey = String(ev.status || 'upcoming').toLowerCase();
+                      const display = String(ev.status || 'upcoming');
+                      return <span className={`${styles.pill} ${styles[`pill${statusKey}`]}`}>{display}</span>;
+                    })()}
                   </div>
 
                   <div className={styles.eventMeta}>
@@ -196,7 +200,11 @@ export default function VolunteerDashboard() {
                 <article key={ev._id || ev.id || ev.title} className={styles.eventCard}>
                   <div className={styles.eventCardHead}>
                     <h3 className={styles.eventName}>{ev.title}</h3>
-                    <span className={`${styles.pill} ${styles[`pill${ev.status || 'completed'}`]}`}>{ev.status}</span>
+                    {(() => {
+                      const statusKey = String(ev.status || 'completed').toLowerCase();
+                      const display = String(ev.status || 'completed');
+                      return <span className={`${styles.pill} ${styles[`pill${statusKey}`]}`}>{display}</span>;
+                    })()}
                   </div>
 
                   <div className={styles.eventMeta}>

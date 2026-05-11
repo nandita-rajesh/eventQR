@@ -172,6 +172,10 @@
     border-radius: 999px;
 
     font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: capitalize;
   }
 
   .pillactive {
@@ -182,6 +186,16 @@
   .pillupcoming {
     background: #dbeafe;
     color: #2563eb;
+  }
+
+  .pillongoing {
+    background: #ecfdf5;
+    color: #059669;
+  }
+
+  .pillcompleted {
+    background: #e5e7eb;
+    color: #4b5563;
   }
 
   .eventMeta {

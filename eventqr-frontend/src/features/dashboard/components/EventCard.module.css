@@ -28,6 +28,11 @@
   color: #2563eb;
 }
 
+.ongoing {
+  background: #ecfdf5;
+  color: #059669;
+}
+
 .completed {
   background: #e5e7eb;
   color: #4b5563;

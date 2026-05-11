@@ -735,3 +735,40 @@
 .skeletonRow { height: 48px; border-radius: 10px; background: linear-gradient(90deg, #f3f4f6 25%, #e9eef8 37%, #f3f4f6 63%); background-size: 400% 100%; animation: shimmer 1.2s linear infinite; }
 
 .skeletonSession { height: 72px; border-radius: 12px; background: linear-gradient(90deg, #f3f4f6 25%, #e9eef8 37%, #f3f4f6 63%); background-size: 400% 100%; animation: shimmer 1.2s linear infinite; }
+
+/* Status pill + editor */
+.statusPill {
+  border: none;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  text-transform: capitalize;
+  cursor: pointer;
+  background: #e6eefc;
+  color: #2563eb;
+}
+.statusUpcoming { background: #eef2ff; color: #2563eb; }
+.statusOngoing { background: #ecfdf5; color: #059669; }
+.statusCompleted { background: #f3f4f6; color: #6b7280; }
+.statusEditor { display: flex; align-items: center; gap: 8px; }
+
+.statusEditBtn {
+  border: none;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #374151;
+}
+.statusEditBtn:hover { background: #f3f4f6; }
+
+.statusPillIcon {
+  font-size: 13px;
+  color: inherit;
+  opacity: 0.9;
+}
+.statusPill:hover .statusPillIcon { opacity: 1; }

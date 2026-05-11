@@ -62,7 +62,7 @@ export const updateEventService = async (eventId, user, data) => {
         throw new Error("Unauthorized");
     }
 
-    const allowedFields = ["title", "description", "date", "venue", "isPublic"];
+    const allowedFields = ["title", "description", "date", "venue","status", "isPublic"];
 
     allowedFields.forEach((field) => {
         if(data[field] !== undefined){
