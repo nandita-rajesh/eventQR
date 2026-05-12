@@ -139,6 +139,27 @@
     color: #64748b;
   }
 
+  /* Topbar / back button (used by event detail pages) */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+    cursor: pointer;
+  }
+
+  .backButton {
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    color: #475569;
+  }
+
+  .topbarTitle {
+    font-size: 14px;
+    color: #475569;
+  }
+
   .eventGrid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);

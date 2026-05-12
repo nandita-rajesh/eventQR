@@ -12,6 +12,7 @@ import CreateEvent from "../features/events/pages/CreateEvent";
 import OrganizerEventDetail from "../features/events/pages/OrganizerEventDetail";
 import OrganizerEventParticipants from "../features/events/pages/OrganizerEventParticipants";
 import OrganizerEventVolunteers from "../features/events/pages/OrganizerEventVolunteers";
+import SessionAttendance from "../features/events/pages/SessionAttendance";
 
 
 
@@ -34,6 +35,7 @@ const AppRoutes = () => {
         <Route path="/events/:id" element={<OrganizerEventDetail />}/>
         <Route path="/events/:id/participants" element={<OrganizerEventParticipants />} />
         <Route path="/events/:id/volunteers" element={<OrganizerEventVolunteers />} />
+        <Route path="/events/:eventId/sessions/:sessionId/attendance" element={<SessionAttendance />} />
       </Routes>
     </BrowserRouter>
   );

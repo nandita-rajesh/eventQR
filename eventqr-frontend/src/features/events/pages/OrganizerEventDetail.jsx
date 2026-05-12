@@ -27,6 +27,7 @@ import {
   updateEvent,
   deleteEvent,
   addEventSession,
+    getEventAttendanceReport,
 } from "../../../shared/api/eventsApi";
 
 export default function OrganizerEventDetail() {
@@ -101,6 +102,10 @@ export default function OrganizerEventDetail() {
   const [exportLoading, setExportLoading] = useState(false);
   const [exportError, setExportError] = useState('');
 
+  const [attendanceReport, setAttendanceReport] = useState(null);
+  const [attendanceLoading, setAttendanceLoading] = useState(false);
+  const [attendanceError, setAttendanceError] = useState('');
+
   // status edit
   const [showStatusEdit, setShowStatusEdit] = useState(false);
   const [statusDraft, setStatusDraft] = useState(eventData?.status || '');
@@ -135,6 +140,22 @@ export default function OrganizerEventDetail() {
         else setFetchError(err.response?.data?.error || err.message || "Event not found");
       } finally {
         if (mounted) setLoading(false);
+      }
+    })();
+
+    // fetch attendance report separately
+    (async () => {
+      setAttendanceLoading(true);
+      setAttendanceError('');
+      try {
+        const rep = await getEventAttendanceReport(id);
+        if (!mounted) return;
+        setAttendanceReport(rep);
+      } catch (err) {
+        if (!mounted) return;
+        setAttendanceError(err.response?.data?.error || err.message || 'Could not load attendance report');
+      } finally {
+        if (mounted) setAttendanceLoading(false);
       }
     })();
 
@@ -534,7 +555,20 @@ export default function OrganizerEventDetail() {
           </div>
           <p className={styles.description}>{eventData.description}</p>
 
-          <div className={styles.statsGrid}><div className={styles.statCard}><h2>{eventData.participants || 0}</h2><p>Registered</p></div><div className={styles.statCard}><h2>{eventData.participants || 0}</h2><p>Attended</p></div><div className={styles.statCard}><h2>100%</h2><p>Attendance Rate</p></div></div>
+          <div className={styles.statsGrid}>
+            <div className={styles.statCard}>
+              <h2>{attendanceReport?.totalParticipants ?? eventData.participants ?? 0}</h2>
+              <p>Registered</p>
+            </div>
+            <div className={styles.statCard}>
+              <h2>{attendanceReport?.totalAttendanceRecords ?? 0}</h2>
+              <p>Checked In</p>
+            </div>
+            <div className={styles.statCard}>
+              <h2>{attendanceReport ? `${Math.round(((attendanceReport.totalAttendanceRecords||0) / (attendanceReport.totalParticipants||1)) * 100)}%` : '—'}</h2>
+              <p>Attendance Rate</p>
+            </div>
+          </div>
         </div>
 
         <div className={styles.actionGrid}>
@@ -604,7 +638,14 @@ export default function OrganizerEventDetail() {
           <div className={styles.participantsHeader}><Icon name="calendar" size={20} /><h2>Sessions</h2><div style={{ marginLeft: 'auto' }}><button className={styles.addBtn} onClick={() => setShowAddSession(true)}>Add Session</button></div></div>
           <div className={styles.sessionList}>
             {(!eventData?.sessions || eventData.sessions.length === 0) ? (<p>No sessions scheduled</p>) : (eventData.sessions.map(s => (
-              <div key={s._id || s.id} className={styles.sessionRow}><h3>{s.name}</h3><div className={styles.sessionMeta}><span>{s.startTime ? new Date(s.startTime).toLocaleString() : ''} to {s.endTime ? new Date(s.endTime).toLocaleString() : ''}</span></div><p>{s.description}</p></div>
+              <div key={s._id || s.id} className={styles.sessionRow}>
+                <h3>{s.name}</h3>
+                <div className={styles.sessionMeta}><span>{s.startTime ? new Date(s.startTime).toLocaleString() : ''} to {s.endTime ? new Date(s.endTime).toLocaleString() : ''}</span></div>
+                <p>{s.description}</p>
+                <div style={{marginTop:8}}>
+                  <button className={styles.addBtn} onClick={() => navigate(`/events/${eventData._id || eventData.id}/sessions/${s._id || s.id}/attendance`)}>View attendance</button>
+                </div>
+              </div>
             )))}
           </div>
         </section>

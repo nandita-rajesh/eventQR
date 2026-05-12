@@ -219,6 +219,30 @@ export const scanAttendance = async (tokenValue, sessionId) => {
   return res.data;
 };
 
+// Get participants who attended a session: GET /attendance/sessions/{sessionId}/participants
+export const getSessionParticipants = async (sessionId) => {
+  const token = localStorage.getItem('token');
+  if (!token) throw { status: 401, message: 'No token' };
+
+  const res = await axios.get(`${BASE}/attendance/sessions/${sessionId}/participants`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  return res.data;
+};
+
+// Get attendance report for an event: GET /attendance/events/{id}/report
+export const getEventAttendanceReport = async (eventId) => {
+  const token = localStorage.getItem('token');
+  if (!token) throw { status: 401, message: 'No token' };
+
+  const res = await axios.get(`${BASE}/attendance/events/${eventId}/report`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  return res.data;
+};
+
 // Manually mark attendance: POST /attendance/manual { participantId, sessionId }
 export const markAttendanceManual = async (participantId, sessionId) => {
   const token = localStorage.getItem('token');
