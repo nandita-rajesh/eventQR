@@ -341,6 +341,9 @@ export default function EventDetail() {
                   <span>{new Date(s.startTime).toLocaleString()} to {new Date(s.endTime).toLocaleString()}</span>
                 </div>
                 <p>{s.description}</p>
+                <div style={{marginTop:8}}>
+                  <button className={styles.addBtn} onClick={() => navigate(`/events/${id}/sessions/${s._id || s.id}/attendance`)}>View attendance</button>
+                </div>
               </div>
             ))
           )}

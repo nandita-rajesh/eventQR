@@ -82,7 +82,21 @@ export default function SessionAttendance() {
       <div className={styles.desktopContent} style={{maxWidth:980}}>
         <div className={styles.card}>
           <header className={styles.topbar} style={{marginBottom: 12}}>
-            <button className={styles.backButton} onClick={() => navigate(`/events/${eventId}`)}>&larr;  <span className={styles.topbarTitle}>Back to Event</span></button>
+            <button
+              className={styles.backButton}
+              onClick={() => {
+                // Prefer going back in history so we return to the correct caller (organizer or volunteer).
+                // If there is no meaningful history (direct open), compute a fallback based on the current path.
+                const loc = window.location;
+                if (window.history.length > 1) {
+                  navigate(-1);
+                } else {
+                  const pathname = loc.pathname || '';
+                  const fallback = pathname.includes('/volunteer') ? `/volunteer/event/${eventId}` : `/events/${eventId}`;
+                  navigate(fallback);
+                }
+              }}
+            >&larr;  <span className={styles.topbarTitle}>Back to Event</span></button>
           </header>
 
           <div style={{marginBottom: 8}}>
