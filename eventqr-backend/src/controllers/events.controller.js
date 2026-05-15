@@ -1,4 +1,5 @@
 import { addParticipantService, addSessionService, assignVolunteerService, createEventService, deleteEventService, getAssignedVolunteersService, getEventAttendanceSummaryService, getEventByIdService, getMyEventsService, getParticipantsService, resendParticipantQrService, searchParticipantsService, updateEventService, uploadParticipantsCSVService } from "../services/events.service.js";
+import fs from "fs";
 
 export const createEvent = async (req, res) => {
     try {
@@ -165,6 +166,32 @@ export const getParticipants = async (req, res) => {
 
 export const uploadParticipantsCSV = async (req, res) => {
   try {
+    // basic server-side checks in addition to multer
+    if (!req.file || !req.file.path) {
+      return res.status(400).json({ error: "CSV file is required" });
+    }
+
+    const allowed = [
+      "text/csv",
+      "application/vnd.ms-excel",
+      "text/plain",
+    ];
+
+    if (!allowed.includes(req.file.mimetype)) {
+      // remove uploaded file
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch (e) {}
+      return res.status(400).json({ error: "Only CSV files are allowed" });
+    }
+
+    const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
+    if (req.file.size && req.file.size > MAX_BYTES) {
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch (e) {}
+      return res.status(400).json({ error: "CSV file exceeds size limit (5 MB)" });
+    }
 
     const participants = await uploadParticipantsCSVService(
       req.params.id,

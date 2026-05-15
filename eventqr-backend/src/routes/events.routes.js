@@ -8,6 +8,21 @@ const router = express.Router();
 
 const upload = multer({
     dest: "uploads/",
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB limit
+    fileFilter: (req, file, cb) => {
+        // allow common CSV MIME types
+        const allowed = [
+            "text/csv",
+            "application/vnd.ms-excel",
+            "text/plain",
+        ];
+
+        if (allowed.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error("Only CSV files are allowed"));
+        }
+    },
 });
 
 /**
